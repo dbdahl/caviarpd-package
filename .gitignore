@@ -4,3 +4,4 @@
 .Ruserdata
 caviarpd_*.tar.gz
 caviarpd_*.zip
+*.Rcheck
