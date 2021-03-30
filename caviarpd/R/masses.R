@@ -18,10 +18,10 @@
 #'
 #' @examples
 #' tooth.dis <- dist(scale(ToothGrowth[,-2]))
-#' # In practice the user should do more than 100 runs, but for ease of testing we use less here
-#' select.masses(tooth.dis, ncl.range=c(2,4), nSamplesA=100, nSamplesB=100)
+#' # In practice the user should do at least 100 runs, but for ease of testing we use less here.
+#' select.masses(tooth.dis, ncl.range=c(2,4), nSamplesA=10, nSamplesB=10)
 #' iris.dis <- dist(iris[,-5])
-#' select.masses(iris.dis, ncl.range=c(3,6), single=TRUE)
+#' select.masses(iris.dis, ncl.range=c(3,6), single=TRUE, nSamplesA=10, nSamplesB=10)
 #'
 #' @export
 #' @importFrom stats dist uniroot var
@@ -104,9 +104,9 @@ select.masses <- function(dis, ncl.range, single=FALSE, nSD=3, discount=0.0, tem
 #'
 #' @examples
 #' iris.dis <- dist(iris[,-5])
-#' iris.masses <- select.masses(iris.dis, ncl.range=c(3,6), nSamples=100)
-#' single.mass(masses=iris.masses, dis=iris.dis, nSamples=100)
-#' single.mass(masses=seq(.5, 2, by=.25), dis=iris.dis, nSamples=100)
+#' iris.masses <- select.masses(iris.dis, ncl.range=c(3,6), nSamplesA=10, nSamplesB=10)
+#' single.mass(masses=iris.masses, dis=iris.dis, nSamples=10)
+#' single.mass(masses=seq(.5, 2, by=.25), dis=iris.dis, nSamples=10)
 #'
 #' @export
 #'

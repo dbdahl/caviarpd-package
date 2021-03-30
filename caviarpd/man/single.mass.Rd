@@ -39,8 +39,8 @@ Calculates the partition confidence and variance ratios for each mass value to f
 }
 \examples{
 iris.dis <- dist(iris[,-5])
-iris.masses <- select.masses(iris.dis, ncl.range=c(3,6), nSamples=100)
-single.mass(masses=iris.masses, dis=iris.dis, nSamples=100)
-single.mass(masses=seq(.5, 2, by=.25), dis=iris.dis, nSamples=100)
+iris.masses <- select.masses(iris.dis, ncl.range=c(3,6), nSamplesA=10, nSamplesB=10)
+single.mass(masses=iris.masses, dis=iris.dis, nSamples=10)
+single.mass(masses=seq(.5, 2, by=.25), dis=iris.dis, nSamples=10)
 
 }

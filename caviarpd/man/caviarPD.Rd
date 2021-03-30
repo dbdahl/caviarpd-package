@@ -44,6 +44,6 @@ Returns a clustering estimate given pairwise distances. Users can also specify p
 \examples{
 iris.dis <- dist(iris[,-5])
 caviarPD(distance=iris.dis)
-caviarPD(distance=iris.dis, mass=0.75, loss="binder", nSamples=100, maxSize=3)
+caviarPD(distance=iris.dis, mass=0.75, loss="binder", nSamples=10, maxSize=3)
 
 }

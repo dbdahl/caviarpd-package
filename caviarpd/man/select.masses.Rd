@@ -47,9 +47,9 @@ User inputs a range of clustering sizes to obtain a mass value that can viably c
 }
 \examples{
 tooth.dis <- dist(scale(ToothGrowth[,-2]))
-# In practice the user should do more than 100 runs, but for ease of testing we use less here
-select.masses(tooth.dis, ncl.range=c(2,4), nSamplesA=100, nSamplesB=100)
+# In practice the user should do at least 100 runs, but for ease of testing we use less here.
+select.masses(tooth.dis, ncl.range=c(2,4), nSamplesA=10, nSamplesB=10)
 iris.dis <- dist(iris[,-5])
-select.masses(iris.dis, ncl.range=c(3,6), single=TRUE)
+select.masses(iris.dis, ncl.range=c(3,6), single=TRUE, nSamplesA=10, nSamplesB=10)
 
 }
