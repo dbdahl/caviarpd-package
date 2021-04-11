@@ -2,7 +2,7 @@
 #'
 #' User inputs a range of clustering sizes to obtain a mass value that can viably correspond to each cluster count.
 #'
-#' @param dis Pairwise distance matrix of class 'dist'.
+#' @param distance Pairwise distance matrix of class 'dist'.
 #' @param ncl.range A vector of two values representing the minimum and maximum number of clusters that the user wishes to consider in selecting mass values.
 #' @param single If TRUE, the algorithm returns both a list of masses for each targeted cluster count as well as a best overal mass selected from that list.
 #' @param nSD Number of standard deviations in the EPA distribution to consider for a range of mass values; lower values allow the algorithm to run more quickly but risk an error if deemed insufficient.
@@ -18,7 +18,7 @@
 #'
 #' @examples
 #' tooth.dis <- dist(scale(ToothGrowth[,-2]))
-#' # In practice the user should do at least 100 runs, but for ease of testing we use less here.
+#' # In practice the user should use at least 100 samples, but for ease of testing we use less here.
 #' select.masses(tooth.dis, ncl.range=c(2,4), nSamplesA=10, nSamplesB=10)
 #' iris.dis <- dist(iris[,-5])
 #' select.masses(iris.dis, ncl.range=c(3,6), single=TRUE, nSamplesA=10, nSamplesB=10)
@@ -26,12 +26,20 @@
 #' @export
 #' @importFrom stats dist uniroot var
 #'
-select.masses <- function(dis, ncl.range, single=FALSE, nSD=3, discount=0.0, temperature=10.0,
+select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0, temperature=10.0,
                           loss='binder', nSamplesA=500, nSamplesB=1000, w=c(1,1,0)) {
+
+  ### ERROR CHECKING ###
+  if (class(distance) != 'dist') stop(" 'distance' argument must be an object of class 'dist' ")
+  else if (length(ncl.range) != 2 | !is.numeric(ncl.range)) stop(" 'ncl.range' argument must be numeric vector of 2 elements ")
+  else if (!is.numeric(nSD) | nSD %% 1 !=0 | nSD < 1) stop(" 'nSD' argument must be a positive integer >= 1")
+  else if (length(w) != 3) stop(" weights must have 3 elements ")
+  else if (!is.numeric(w) | !(all(w >= 0))) stop(" weights must be numeric and nonnegative ")
+  if (ncl.range[1] > ncl.range[2]) ncl.range <- ncl.range[c(2,1)]
 
   nsubsets.average <- function(mass, n) sum(mass / (mass + 1:n - 1))
   nsubsets.variance <- function(mass, n) sum((mass * (1:n - 1)) / (mass + 1:n - 1)^2)
-  nclust <- function(mass, dis, loss='binder') { caviarPD(distance=dis, mass, temperature=temperature, discount=discount,
+  nclust <- function(mass, distance, loss='binder') { caviarPD(distance=distance, mass, temperature=temperature, discount=discount,
                                                           loss=loss, nSamples=nSamplesA)$summary$nClusters }
 
   bounds.by.ncl <- function(ncl.range, nSD=3) {
@@ -69,12 +77,12 @@ select.masses <- function(dis, ncl.range, single=FALSE, nSD=3, discount=0.0, tem
   masses <- numeric(length(ncls))
 
   # Use uniroot to pinpoint a mass value inside the bounds that yields each cluster count
-  func <- function(ncl, dis, loss) { function(mass) { nclust(mass, dis, loss) - ncl } }
+  func <- function(ncl, distance, loss) { function(mass) { nclust(mass, distance, loss) - ncl } }
   for (i in 1:nrow(df)) {
     # If we are using VI loss, we only need the upper half of the bounds
     #if (loss=='binder') bounds <- c(df$Lower[i], df$Upper[i]) else bounds <- c(mean(c(df$Lower[i], df$Estimate[i])), df$Upper[i])
     bounds <- c(df$Lower[i], df$Upper[i])
-    masses[i] <- uniroot(func(ncls[i], dis, loss), bounds)$root
+    masses[i] <- uniroot(func(ncls[i], distance, loss), bounds)$root
   }
 
   # Run the single,mass function if an optimal mass value is needed, otherwise, just return the sequence of masses
@@ -83,7 +91,7 @@ select.masses <- function(dis, ncl.range, single=FALSE, nSD=3, discount=0.0, tem
   if (single==FALSE) {
     return(mat)
   } else {
-    final_mass <- single.mass(masses, dis, temperature=temperature, discount=discount, nSamples=nSamplesB, w=w, loss=loss)
+    final_mass <- single.mass(masses, distance, temperature=temperature, discount=discount, nSamples=nSamplesB, w=w, loss=loss)
     return(list(masses=mat, best=final_mass))
   }
 }
@@ -93,7 +101,7 @@ select.masses <- function(dis, ncl.range, single=FALSE, nSD=3, discount=0.0, tem
 #' Calculates the partition confidence and variance ratios for each mass value to find the best mass. User can input masses from the select.masses function or supply their own.
 #'
 #' @param masses A vector of mass values from which to select the best mass. This can be a simple sequence for some range or a list of masses generated from the select.masses function.
-#' @param dis Pairwise distance matrix of class 'dist'.
+#' @param distance Pairwise distance matrix of class 'dist'.
 #' @param temperature A positive number that accentuates or dampens distance between observations.
 #' @param discount Typically 0, controls the distribution of subset sizes.
 #' @param nSamples The number of samples used to estimate the loss function in the salso method.
@@ -105,18 +113,25 @@ select.masses <- function(dis, ncl.range, single=FALSE, nSD=3, discount=0.0, tem
 #' @examples
 #' iris.dis <- dist(iris[,-5])
 #' iris.masses <- select.masses(iris.dis, ncl.range=c(3,6), nSamplesA=10, nSamplesB=10)
-#' single.mass(masses=iris.masses, dis=iris.dis, nSamples=10)
-#' single.mass(masses=seq(.5, 2, by=.25), dis=iris.dis, nSamples=10)
+#' single.mass(masses=iris.masses, distance=iris.dis, nSamples=10)
+#' single.mass(masses=seq(.5, 2, by=.25), distance=iris.dis, nSamples=10)
 #'
 #' @export
 #'
-single.mass <- function(masses, dis, temperature=10.0, discount=0.0, nSamples=1000, w=c(1,1,0), loss='binder') {
+single.mass <- function(masses, distance, temperature=10.0, discount=0.0, nSamples=1000, w=c(1,1,0), loss='binder') {
+
+  ### ERROR CHECKING ###
+  if (class(distance) != 'dist') stop(" 'distance' argument must be an object of class 'dist' ")
+  else if( !is.numeric(masses) ) stop(" 'masses' must all be numeric and greater than -'discount' ")
+  else if (length(w) != 3) stop(" weights must have 3 elements ")
+  else if (!is.numeric(w) | !(all(w >= 0))) stop(" weights must be numeric and nonnegative ")
+
   pc <- numeric(length(masses))
   wc_var <- numeric(length(masses))
   total_var <- numeric(length(masses))
   ncl <- numeric(length(masses))
   for (i in 1:length(masses)) {
-    b <- caviarPD(dis, masses[i], temperature=temperature, discount=discount,
+    b <- caviarPD(distance, masses[i], temperature=temperature, discount=discount,
                   loss=loss, nSamples=nSamples)
     psmat <- b$summary$psm
     x <- b$estimate

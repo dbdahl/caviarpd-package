@@ -18,6 +18,8 @@
 #' @export
 #'
 loss.indexes <- function(estimate.list, truth, order.by='binder') {
+  if (class(estimate.list) != 'list') stop(" estimates must be in list form ")
+  else if ( length(unique(sapply(estimate.list, length))) != 1 ) stop (" all estimates in estimate.list must be of equal length ")
   n <- length(estimate.list)
   mat <- matrix(0, nrow=n, ncol=3)
   for (i in 1:n) {
@@ -28,8 +30,13 @@ loss.indexes <- function(estimate.list, truth, order.by='binder') {
   }
   colnames(mat) <- c("N-Clusters", "Binder", "VI")
   rownames(mat) <- names(estimate.list)
-  if (order.by == 'binder') mat <- mat[order(mat[,2],decreasing=FALSE),]
-  if (order.by == 'VI') mat <- mat[order(mat[,3],decreasing=FALSE),]
+  if (order.by == 'binder') {
+    mat <- mat[order(mat[,2],decreasing=FALSE),]
+  } else if (order.by == 'VI') {
+    mat <- mat[order(mat[,3],decreasing=FALSE),]
+  } else {
+    stop(" must order results by either binder or VI loss ")
+  }
   mat
 }
 

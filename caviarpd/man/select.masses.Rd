@@ -5,7 +5,7 @@
 \title{Mass Parameter Selection for the CaviarPD Procedure}
 \usage{
 select.masses(
-  dis,
+  distance,
   ncl.range,
   single = FALSE,
   nSD = 3,
@@ -18,7 +18,7 @@ select.masses(
 )
 }
 \arguments{
-\item{dis}{Pairwise distance matrix of class 'dist'.}
+\item{distance}{Pairwise distance matrix of class 'dist'.}
 
 \item{ncl.range}{A vector of two values representing the minimum and maximum number of clusters that the user wishes to consider in selecting mass values.}
 
@@ -47,7 +47,7 @@ User inputs a range of clustering sizes to obtain a mass value that can viably c
 }
 \examples{
 tooth.dis <- dist(scale(ToothGrowth[,-2]))
-# In practice the user should do at least 100 runs, but for ease of testing we use less here.
+# In practice the user should use at least 100 samples, but for ease of testing we use less here.
 select.masses(tooth.dis, ncl.range=c(2,4), nSamplesA=10, nSamplesB=10)
 iris.dis <- dist(iris[,-5])
 select.masses(iris.dis, ncl.range=c(3,6), single=TRUE, nSamplesA=10, nSamplesB=10)

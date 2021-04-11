@@ -15,8 +15,9 @@
 #'
 #' @examples
 #' iris.dis <- dist(iris[,-5])
-#' caviarPD(distance=iris.dis)
+#' caviarPD(distance=iris.dis, nSamples=10)
 #' caviarPD(distance=iris.dis, mass=0.75, loss="binder", nSamples=10, maxSize=3)
+#' # In practice the user should use at least 100 samples, but for ease of testing we use less here.
 #'
 #' @export
 #' @importFrom salso salso binder VI
@@ -27,24 +28,18 @@ caviarPD <- function(distance, temperature=10.0, mass=1.0, discount=0.0, loss="V
 
   ### ERROR CHECKING ###
   if (class(distance) != 'dist') stop(" 'distance' argument must be an object of class 'dist' ")
-  else if(class(mass) != 'numeric' ) stop(" 'mass' argument must be an object of class 'numeric' ")
-  else if(class(nSamples) != 'numeric' ) stop(" 'nSamples' argument must be an object of class 'numeric' ")
-  else if (loss != "VI" & loss != 'binder') stop(" 'loss' argument must be specified as either
-                                                'binder' or 'VI' ")
+  else if( !is.numeric(mass) ) stop(" 'mass' must be numeric and greater than -'discount' ")
+  else if (loss != "VI" & loss != 'binder') stop(" 'loss' argument must be specified as either 'binder' or 'VI' ")
   else if (samplesOnly != TRUE & samplesOnly != FALSE) stop(" 'samplesOnly' argument is not interpretable as logical ")
-  else if(nSamples <= 0 | nSamples %% 1 !=0) stop (" must specify a positive integer for the 'nsamples' argument ")
-
-
-  # Is temp restricted to be positive? What is discount restricted to?
-
-  #else if(class(temperature) != 'numeric' ) stop(" 'temperature' argument must be an object of class 'numeric' ")
-  #else if(class(discount) != 'numeric' ) stop(" 'discount' argument must be an object of class 'numeric' ")
-  #else if(class(maxSize) != 'numeric' ) stop(" 'maxSize' argument must be an object of class 'numeric' ")
+  else if(nSamples <= 0 | nSamples %% 1 !=0 | !is.numeric(nSamples)) stop (" must specify a positive integer for the 'nsamples' argument ")
+  else if (temperature < 0) stop(" 'temperature' must be nonnegarive ")
+  else if(maxSize < 0 | maxSize %% 1 !=0 | !is.numeric(maxSize)) warning (" 'maxSize' argument should be a positive integer, ignoring constraint ")
 
 
   similarity <- exp( -temperature * as.matrix(distance) )
   if (distr=="EPA") {
-    distr <- EPAPartition(similarity=similarity, mass=mass, discount=discount, permutation=seq_len(nrow(similarity)))
+    distr <- EPAPartition(similarity=similarity, mass=mass, discount=discount,
+                          permutation=seq_len(nrow(similarity)))
   } else if (distr=="ddCRP") {
     distr <- DDCRPPartition(similarity=similarity, mass=mass)
   } else {

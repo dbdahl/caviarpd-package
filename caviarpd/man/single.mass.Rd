@@ -7,7 +7,7 @@ Calculates the partition confidence and variance ratios for each mass value to f
 \usage{
 single.mass(
   masses,
-  dis,
+  distance,
   temperature = 10,
   discount = 0,
   nSamples = 1000,
@@ -18,7 +18,7 @@ single.mass(
 \arguments{
 \item{masses}{A vector of mass values from which to select the best mass. This can be a simple sequence for some range or a list of masses generated from the select.masses function.}
 
-\item{dis}{Pairwise distance matrix of class 'dist'.}
+\item{distance}{Pairwise distance matrix of class 'dist'.}
 
 \item{temperature}{A positive number that accentuates or dampens distance between observations.}
 
@@ -40,7 +40,7 @@ Calculates the partition confidence and variance ratios for each mass value to f
 \examples{
 iris.dis <- dist(iris[,-5])
 iris.masses <- select.masses(iris.dis, ncl.range=c(3,6), nSamplesA=10, nSamplesB=10)
-single.mass(masses=iris.masses, dis=iris.dis, nSamples=10)
-single.mass(masses=seq(.5, 2, by=.25), dis=iris.dis, nSamples=10)
+single.mass(masses=iris.masses, distance=iris.dis, nSamples=10)
+single.mass(masses=seq(.5, 2, by=.25), distance=iris.dis, nSamples=10)
 
 }
