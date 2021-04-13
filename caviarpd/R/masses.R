@@ -96,8 +96,8 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
   }
 }
 
-#' Mass Parameter Selection for the CaviarPD Procedure
-
+#' Single Mass Parameter Selection for the CaviarPD Procedure
+#'
 #' Calculates the partition confidence and variance ratios for each mass value to find the best mass. User can input masses from the select.masses function or supply their own.
 #'
 #' @param masses A vector of mass values from which to select the best mass. This can be a simple sequence for some range or a list of masses generated from the select.masses function.

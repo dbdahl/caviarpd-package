@@ -2,9 +2,14 @@ Package: caviarpd
 Type: Package
 Title: Cluster Analysis via Random Partition Distributions
 Version: 0.1.0
-Authors@R: c(person(given="David B.",family="Dahl",role=c("aut","cre"),email="dahl@stat.byu.edu"), person(given="Brandon",family="Carter",role=c("aut"),email="carterj4@icloud.com"))
-Description: A very cool package.
+Authors@R: c(person(given="David B.",family="Dahl",role=c("aut","cre"),email="dahl@stat.byu.edu"), 
+             person(given="Brandon",family="Carter",role=c("aut"),email="carterj4@icloud.com"),
+             person(given="Jacob", family="Andros", role=c("aut"),email="androsrj@gmail.com"))
+Description: CaviarPD uses random partition distributions and pairwise distance information to perform 
+             cluster analysis. This package contains the implementation of the CaviarPD clustering technique
+             and algorithms for selecting the mass parameter.
 License: MIT + file LICENSE | Apache License 2.0
+Maintainer: David B. Dahl <dahl@stat.byu.edu>
 Depends: pumpkin, salso
 Suggests: testthat
 Encoding: UTF-8

@@ -2,8 +2,7 @@
 % Please edit documentation in R/masses.R
 \name{single.mass}
 \alias{single.mass}
-\title{Mass Parameter Selection for the CaviarPD Procedure
-Calculates the partition confidence and variance ratios for each mass value to find the best mass. User can input masses from the select.masses function or supply their own.}
+\title{Mass Parameter Selection for the CaviarPD Procedure}
 \usage{
 single.mass(
   masses,
@@ -34,7 +33,6 @@ single.mass(
 The value of the mass parameter that should be used in the caviarPD method for the given pairwise distance matrix.
 }
 \description{
-Mass Parameter Selection for the CaviarPD Procedure
 Calculates the partition confidence and variance ratios for each mass value to find the best mass. User can input masses from the select.masses function or supply their own.
 }
 \examples{
