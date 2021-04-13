@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# cbindgen >| api.h
+cp ~/docs/devel/rust-dahl-randompartition/dahl-randompartition.h .
+

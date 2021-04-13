@@ -2,7 +2,7 @@
 % Please edit documentation in R/masses.R
 \name{single.mass}
 \alias{single.mass}
-\title{Mass Parameter Selection for the CaviarPD Procedure}
+\title{Single Mass Parameter Selection for the CaviarPD Procedure}
 \usage{
 single.mass(
   masses,

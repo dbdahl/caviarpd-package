@@ -1,3 +1,4 @@
+.DS_Store
 .Rproj.user
 .Rhistory
 .RData
@@ -5,3 +6,11 @@
 caviarpd_*.tar.gz
 caviarpd_*.zip
 *.Rcheck
+/*_*.tar.gz
+/*/src/*.o
+/*/src/*.so
+/*/src/*.dll
+/*/src/*.a
+/*/src/rustlib/target
+/*/src-i386
+/*/src-x64

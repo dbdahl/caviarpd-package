@@ -1,0 +1,13 @@
+[package]
+name = "rustlib"
+version = "0.1.0"
+authors = ["David B. Dahl <dahl@stat.byu.edu>"]
+edition = "2018"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+dahl-randompartition = { git="https://dahl-git.byu.edu/dahl/rust-dahl-randompartition.git" }
+# dahl-randompartition = { path="/home/dahl/docs/devel/rust-dahl-randompartition" }
+

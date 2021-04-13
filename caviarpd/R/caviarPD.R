@@ -21,7 +21,6 @@
 #'
 #' @export
 #' @importFrom salso salso binder VI
-#' @importFrom pumpkin EPAPartition DDCRPPartition samplePartition
 #'
 caviarPD <- function(distance, temperature=10.0, mass=1.0, discount=0.0, loss="VI",
                      nSamples=100, maxSize=0, samplesOnly=FALSE, distr="EPA") {
