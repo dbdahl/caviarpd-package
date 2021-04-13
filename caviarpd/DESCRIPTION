@@ -6,8 +6,13 @@ Authors@R: c(person(given="David B.",family="Dahl",role=c("aut","cre"),email="da
              person(given="Brandon",family="Carter",role=c("aut"),email="carterj4@icloud.com"),
              person(given="Jacob", family="Andros", role=c("aut"),email="androsrj@gmail.com"))
 Description: CaviarPD uses random partition distributions and pairwise distance information to perform 
-             cluster analysis. This package contains the implementation of the CaviarPD clustering technique
-             and algorithms for selecting the mass parameter.
+             cluster analysis. This package contains the implementation of this clustering 
+             method, compatible with both the EPA and ddCRP distributions. Users can simply 
+             draw samples from these distributions, or draw samples and then use them to obtain 
+             and plot clustering estimates. Implementations for mass selection algorithms are 
+             also given since a mass parameter is required to obtain a clustering estimate. 
+             Since pairwise distances make up the input to this procedure, CaviarPD is most 
+             comparable to hierarchical clustering. 
 License: MIT + file LICENSE | Apache License 2.0
 Maintainer: David B. Dahl <dahl@stat.byu.edu>
 Depends: pumpkin, salso
