@@ -28,6 +28,39 @@ Rr_Sexp_Vector_Intsxp rrAllocVectorINTSXP(int len) {
   return s;
 }
 
+double callRFunction_logIntegratedLikelihoodItem(const void* fn_ptr, int i, Rr_Sexp_Vector_Intsxp indices, const void* env_ptr) {
+  SEXP s, t;
+  t = s = PROTECT(Rf_allocList(3));
+  SET_TYPEOF(s, LANGSXP);
+  SETCAR(t, *(SEXP*)fn_ptr); t = CDR(t);
+  SETCAR(t, Rf_ScalarInteger(i)); t = CDR(t);
+  SETCAR(t, (SEXP)indices.sexp_ptr);
+  double ans = Rf_asReal(Rf_eval(s, *(SEXP*)env_ptr));
+  UNPROTECT(2);
+  return ans;
+}
+
+double callRFunction_logIntegratedLikelihoodSubset(const void* fn_ptr, Rr_Sexp_Vector_Intsxp indices, const void* env_ptr) {
+  SEXP R_fcall = PROTECT(Rf_lang2(*(SEXP*)fn_ptr, R_NilValue));
+  SETCADR(R_fcall, (SEXP)indices.sexp_ptr);
+  double ans = Rf_asReal(Rf_eval(R_fcall, *(SEXP*)env_ptr));
+  UNPROTECT(2);
+  return ans;
+}
+
+double callRFunction_logLikelihoodItem(const void* fn_ptr, int i, int label, int is_new, const void* env_ptr) {
+  SEXP s, t;
+  t = s = PROTECT(Rf_allocList(4));
+  SET_TYPEOF(s, LANGSXP);
+  SETCAR(t, *(SEXP*)fn_ptr); t = CDR(t);
+  SETCAR(t, Rf_ScalarInteger(i)); t = CDR(t);
+  SETCAR(t, Rf_ScalarInteger(label)); t = CDR(t);
+  SETCAR(t, Rf_ScalarLogical(is_new)); t = CDR(t);
+  double ans = Rf_asReal(Rf_eval(s, *(SEXP*)env_ptr));
+  UNPROTECT(1);
+  return ans;
+}
+
 SEXP new_EpaParameters(SEXP similarity_sexp, SEXP permutation_sexp, SEXP use_natural_permutation_sexp, SEXP mass_sexp, SEXP discount_sexp) {
   int n_items = Rf_nrows(similarity_sexp);
   similarity_sexp = PROTECT(Rf_coerceVector(similarity_sexp, REALSXP));
