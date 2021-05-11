@@ -11,7 +11,8 @@ single.mass(
   discount = 0,
   nSamples = 1000,
   w = c(1, 1, 0),
-  loss = "binder"
+  loss = "binder",
+  nCores = 0
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ single.mass(
 \item{w}{Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance trio, and the last is attached to the nunber of clusters.}
 
 \item{loss}{The salso method aims to estimate this loss function when searching the partition space for an optimal estimate, must be specified as either "binder" or "VI".}
+
+\item{nCores}{The number of CPU cores to use. A value of zero indicates to use all cores on the system.}
 }
 \value{
 The value of the mass parameter that should be used in the caviarPD method for the given pairwise distance matrix.
@@ -37,8 +40,9 @@ Calculates the partition confidence and variance ratios for each mass value to f
 }
 \examples{
 iris.dis <- dist(iris[,-5])
-iris.masses <- select.masses(iris.dis, ncl.range=c(3,6), nSamplesA=10, nSamplesB=10)
-single.mass(masses=iris.masses, distance=iris.dis, nSamples=10)
-single.mass(masses=seq(.5, 2, by=.25), distance=iris.dis, nSamples=10)
+# In practice, use at least 100 samples and multiple cores. Less here for fast-running examples.
+iris.masses <- select.masses(iris.dis, ncl.range=c(3,6), nSamplesA=10, nSamplesB=10, nCores=1)
+single.mass(masses=iris.masses, distance=iris.dis, nSamples=10, nCores=1)
+single.mass(masses=seq(.5, 2, by=.25), distance=iris.dis, nSamples=10, nCores=1)
 
 }

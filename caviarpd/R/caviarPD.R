@@ -10,7 +10,7 @@
 #' @param maxSize Restriction parameter for the maximum number of clusters in the clustering estimate.
 #' @param samplesOnly If TRUE, returns only the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.
 #' @param distr The random partition distribution used to generate samples, must be specified as either "EPA" or "ddCRP".
-#' @param nCores: The number of CPU cores to use. A value of zero indicates to use all cores on the system.
+#' @param nCores The number of CPU cores to use. A value of zero indicates to use all cores on the system.
 #'
 #' @return A list containing two elements: the clustering estimate and the summary. The summary contains the pairwise probabilities for all samples and is used to create the confidence plots.
 #'

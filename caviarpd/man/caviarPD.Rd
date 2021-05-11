@@ -36,7 +36,7 @@ caviarPD(
 
 \item{distr}{The random partition distribution used to generate samples, must be specified as either "EPA" or "ddCRP".}
 
-\item{nCores:}{The number of CPU cores to use. A value of zero indicates to use all cores on the system.}
+\item{nCores}{The number of CPU cores to use. A value of zero indicates to use all cores on the system.}
 }
 \value{
 A list containing two elements: the clustering estimate and the summary. The summary contains the pairwise probabilities for all samples and is used to create the confidence plots.

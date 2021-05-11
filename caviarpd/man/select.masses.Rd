@@ -14,7 +14,8 @@ select.masses(
   loss = "binder",
   nSamplesA = 500,
   nSamplesB = 1000,
-  w = c(1, 1, 0)
+  w = c(1, 1, 0),
+  nCores = 0
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ select.masses(
 \item{nSamplesB}{Number of samples used by the salso method to obtain the optimal mass; only applicable if single=TRUE.}
 
 \item{w}{Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance trio, and the last is attached to the nunber of clusters.}
+
+\item{nCores}{The number of CPU cores to use. A value of zero indicates to use all cores on the system.}
 }
 \value{
 If single==FALSE, returns a list with two elements: a chain of mass values corresponding to each cluster count,
@@ -47,9 +50,9 @@ User inputs a range of clustering sizes to obtain a mass value that can viably c
 }
 \examples{
 tooth.dis <- dist(scale(ToothGrowth[,-2]))
-# In practice the user should use at least 100 samples, but for ease of testing we use less here.
-select.masses(tooth.dis, ncl.range=c(2,4), nSamplesA=10, nSamplesB=10)
+# In practice, use at least 100 samples and multiple cores. Less here for fast-running examples.
+select.masses(tooth.dis, ncl.range=c(2,4), nSamplesA=10, nSamplesB=10, nCores=1)
 iris.dis <- dist(iris[,-5])
-select.masses(iris.dis, ncl.range=c(3,6), single=TRUE, nSamplesA=10, nSamplesB=10)
+select.masses(iris.dis, ncl.range=c(3,6), single=TRUE, nSamplesA=10, nSamplesB=10, nCores=1)
 
 }
