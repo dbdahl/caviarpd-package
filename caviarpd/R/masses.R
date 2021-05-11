@@ -40,7 +40,7 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
   nsubsets.average <- function(mass, n) sum(mass / (mass + 1:n - 1))
   nsubsets.variance <- function(mass, n) sum((mass * (1:n - 1)) / (mass + 1:n - 1)^2)
   nclust <- function(mass, distance, loss='binder') { caviarPD(distance=distance, mass, temperature=temperature, discount=discount,
-                                                          loss=loss, nSamples=nSamplesA)$summary$nClusters }
+                                                               loss=loss, nSamples=nSamplesA)$summary$nClusters }
 
   bounds.by.ncl <- function(ncl.range, nSD=3) {
 
@@ -76,25 +76,40 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
   ncls <- df$NClusters
   masses <- numeric(length(ncls))
 
-  # Use uniroot to pinpoint a mass value inside the bounds that yields each cluster count
-  func <- function(ncl, distance, loss) { function(mass) { nclust(mass, distance, loss) - ncl } }
-  for (i in 1:nrow(df)) {
-    # If we are using VI loss, we only need the upper half of the bounds
-    #if (loss=='binder') bounds <- c(df$Lower[i], df$Upper[i]) else bounds <- c(mean(c(df$Lower[i], df$Estimate[i])), df$Upper[i])
-    bounds <- c(df$Lower[i], df$Upper[i])
-    masses[i] <- uniroot(func(ncls[i], distance, loss), bounds)$root
+  # Changes below
+  ################################################
+
+  n <- nrow(df)
+  func2 <- function(ncl, distance, loss) { function(mass) { nclust(mass, distance, loss) - ncl } }
+  boundsA <- c(df$Lower[1], df$Upper[1])
+  boundsB <- c(df$Lower[n], df$Upper[n])
+  masses[1] <- tryCatch( uniroot(func2(ncls[1], distance, loss), boundsA)$root, error=function(e) NA)
+  masses[n] <- tryCatch( uniroot(func2(ncls[n], distance, loss), boundsB)$root, error=function(e) NA)
+  for (i in 2:(n/2)) {
+    bounds <- c(max(df$Lower[i], masses[i-1], na.rm=TRUE), min(df$Upper[i], masses[n-i+2], na.rm=TRUE))
+    masses[i] <- tryCatch( uniroot(func2(ncls[i], distance, loss), bounds)$root, error=function(e) NA)
+    masses[n-i+1] <- tryCatch( uniroot(func2(ncls[n-i+1], distance, loss), bounds)$root, error=function(e) NA)
   }
+  if (n %% 2 == 1) {
+    k <- median(1:length(ncls))
+    masses[k] <- tryCatch( uniroot(func2(ncls[k], distance, loss), boundsA)$root, error=function(e) NA)
+  }
+
+
+  ################################################
+
 
   # Run the single,mass function if an optimal mass value is needed, otherwise, just return the sequence of masses
   mat <- matrix(sort(masses), nrow=1)
-  colnames(mat) <- ncls
+  colnames(mat) <- ncls[!is.na(masses)]
   if (single==FALSE) {
     return(mat)
   } else {
-    final_mass <- single.mass(masses, distance, temperature=temperature, discount=discount, nSamples=nSamplesB, w=w, loss=loss)
+    final_mass <- single.mass(masses[!is.na(masses)], distance, temperature=temperature, discount=discount, nSamples=nSamplesB, w=w, loss=loss)
     return(list(masses=mat, best=final_mass))
   }
 }
+
 
 #' Single Mass Parameter Selection for the CaviarPD Procedure
 #'
