@@ -22,8 +22,8 @@ Computes VI and Binder loss for any number of given clustering estimates. Estima
 \examples{
 iris.dis <- dist(iris[,-5])
 iris.truth <- as.numeric(iris[,5])
-est1 <- caviarPD(distance=iris.dis, mass=0.9, nSamples=1000, loss='binder')$estimate
-est2 <- caviarPD(distance=iris.dis, mass=2.0, loss="VI")$estimate
+est1 <- caviarPD(distance=iris.dis, mass=0.9, nSamples=1000, loss='binder')
+est2 <- caviarPD(distance=iris.dis, mass=2.0, loss="VI")
 loss.indexes(list(est1, est2), iris.truth)
 
 }

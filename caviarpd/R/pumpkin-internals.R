@@ -29,16 +29,3 @@ canonicalForm <- function(labels) {
   temp
 }
 
-#' @useDynLib caviarpd .new_EpaParameters .free_EpaParameters
-#'
-partitionDispatch <- function(engine, distr, excluded=NULL) {
-  stp <- function() stop(sprintf("'%s' is not supported.", class(distr)[1]))
-  if ( ( ! is.null(excluded) ) && ( class(distr)[1] %in% excluded ) ) stp()
-  if ( inherits(distr, "EPAPartition") ) {
-    p <- .Call(.new_EpaParameters, distr$similarity, distr$permutation, FALSE, distr$mass, distr$discount)
-    result <- engine(5, p)
-    .Call(.free_EpaParameters, p)
-    result
-  } else stp()
-}
-

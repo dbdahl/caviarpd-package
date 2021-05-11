@@ -1,7 +1,7 @@
 LIBDIR = rustlib/target/release
-STATLIB = $(LIBDIR)/librustlib.a
+STATLIB = $(LIBDIR)/libcaviarpd.a
 
-PKG_LIBS = -L$(LIBDIR) -lrustlib
+PKG_LIBS = -L$(LIBDIR) -lcaviarpd
 
 all: clean
 

@@ -1,13 +1,16 @@
 [package]
-name = "rustlib"
-version = "0.1.0"
-authors = ["David B. Dahl <dahl@stat.byu.edu>"]
-edition = "2018"
+name = 'caviarpd'
+version = '0.1.0'
+edition = '2018'
 
 [lib]
-crate-type = ["staticlib"]
+crate-type = [ 'staticlib' ]
 
 [dependencies]
-dahl-randompartition = { git="https://dahl-git.byu.edu/dahl/rust-dahl-randompartition.git" }
-# dahl-randompartition = { path="/home/dahl/docs/devel/rust-dahl-randompartition" }
+extendr-api = "0.2"
+rand = "0.8.3"
+crossbeam = "0.8.0"
+num_cpus = "1.13.0"
+dahl-salso = "0.5.6"
+epa = { path = "epa" }
 

@@ -1,16 +1,2 @@
-.DS_Store
+.*.swp
 .Rproj.user
-.Rhistory
-.RData
-.Ruserdata
-caviarpd_*.tar.gz
-caviarpd_*.zip
-*.Rcheck
-/*_*.tar.gz
-/*/src/*.o
-/*/src/*.so
-/*/src/*.dll
-/*/src/*.a
-/*/src/rustlib/target
-/*/src-i386
-/*/src-x64

@@ -10,6 +10,7 @@
 #' @param maxSize Restriction parameter for the maximum number of clusters in the clustering estimate.
 #' @param samplesOnly If TRUE, returns only the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.
 #' @param distr The random partition distribution used to generate samples, must be specified as either "EPA" or "ddCRP".
+#' @param nCores: The number of CPU cores to use. A value of zero indicates to use all cores on the system.
 #'
 #' @return A list containing two elements: the clustering estimate and the summary. The summary contains the pairwise probabilities for all samples and is used to create the confidence plots.
 #'
@@ -23,7 +24,7 @@
 #' @importFrom salso salso binder VI
 #'
 caviarPD <- function(distance, temperature=10.0, mass=1.0, discount=0.0, loss="VI",
-                     nSamples=100, maxSize=0, samplesOnly=FALSE, distr="EPA") {
+                     nSamples=100, maxSize=0, samplesOnly=FALSE, distr="EPA", nCores=0) {
 
   ### ERROR CHECKING ###
   if (class(distance) != 'dist') stop(" 'distance' argument must be an object of class 'dist' ")
@@ -39,13 +40,14 @@ caviarPD <- function(distance, temperature=10.0, mass=1.0, discount=0.0, loss="V
   if (distr=="EPA") {
     distr <- EPAPartition(similarity=similarity, mass=mass, discount=discount,
                           permutation=seq_len(nrow(similarity)))
+    if(samplesOnly == TRUE) return(sample_epa(nSamples, similarity, mass, discount, 0))
+    caviarpd(nSamples, similarity, mass, discount, loss=="VI", 16, maxSize, 0)
   } else if (distr=="ddCRP") {
     distr <- DDCRPPartition(similarity=similarity, mass=mass)
+    samples <- samplePartition(distr, nSamples, randomizePermutation=TRUE)
+    if(samplesOnly == TRUE) return(samples)
+    salso(samples, loss=loss, maxNClusters = maxSize)
   } else {
     stop("partition distribution must be specified as either 'EPA' or 'ddCRP' in the 'distr' argument ")
   }
-  samples <- samplePartition(distr, nSamples, randomizePermutation=TRUE)
-  if(samplesOnly == TRUE) return(samples)
-  estimate <- salso(samples, loss=loss, maxNClusters = maxSize)
-  list(estimate=estimate, summary=summary(estimate))
 }

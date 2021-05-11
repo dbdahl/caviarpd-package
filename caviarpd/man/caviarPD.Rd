@@ -13,7 +13,8 @@ caviarPD(
   nSamples = 100,
   maxSize = 0,
   samplesOnly = FALSE,
-  distr = "EPA"
+  distr = "EPA",
+  nCores = 0
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ caviarPD(
 \item{samplesOnly}{If TRUE, returns only the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.}
 
 \item{distr}{The random partition distribution used to generate samples, must be specified as either "EPA" or "ddCRP".}
+
+\item{nCores:}{The number of CPU cores to use. A value of zero indicates to use all cores on the system.}
 }
 \value{
 A list containing two elements: the clustering estimate and the summary. The summary contains the pairwise probabilities for all samples and is used to create the confidence plots.

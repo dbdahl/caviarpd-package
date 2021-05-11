@@ -39,8 +39,7 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
 
   nsubsets.average <- function(mass, n) sum(mass / (mass + 1:n - 1))
   nsubsets.variance <- function(mass, n) sum((mass * (1:n - 1)) / (mass + 1:n - 1)^2)
-  nclust <- function(mass, distance, loss='binder') { caviarPD(distance=distance, mass, temperature=temperature, discount=discount,
-                                                               loss=loss, nSamples=nSamplesA)$summary$nClusters }
+  nclust <- function(mass, distance, loss='binder') { length(unique(caviarPD(distance=distance, mass, temperature=temperature, discount=discount, loss=loss, nSamples=nSamplesA))) }
 
   bounds.by.ncl <- function(ncl.range, nSD=3) {
 
@@ -146,10 +145,9 @@ single.mass <- function(masses, distance, temperature=10.0, discount=0.0, nSampl
   total_var <- numeric(length(masses))
   ncl <- numeric(length(masses))
   for (i in 1:length(masses)) {
-    b <- caviarPD(distance, masses[i], temperature=temperature, discount=discount,
-                  loss=loss, nSamples=nSamples)
-    psmat <- b$summary$psm
-    x <- b$estimate
+    b <- caviarPD(distance, masses[i], temperature=temperature, discount=discount, nSamples=nSamples, samplesOnly=TRUE)
+    x <- salso(b, loss=loss)
+    psmat <- psm(b)
     ncl[i] <- length(unique(x))
     pc_num <- sum(sapply(unique(x), function(label) {
       w <- which(x==label)
