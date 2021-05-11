@@ -38,9 +38,7 @@ caviarPD <- function(distance, temperature=10.0, mass=1.0, discount=0.0, loss="V
 
   similarity <- exp( -temperature * as.matrix(distance) )
   if (distr=="EPA") {
-    distr <- EPAPartition(similarity=similarity, mass=mass, discount=discount,
-                          permutation=seq_len(nrow(similarity)))
-    if(samplesOnly == TRUE) return(sample_epa(nSamples, similarity, mass, discount, 0))
+    if (samplesOnly == TRUE) return(sample_epa(nSamples, similarity, mass, discount, 0))
     caviarpd(nSamples, similarity, mass, discount, loss=="VI", 16, maxSize, 0)
   } else if (distr=="ddCRP") {
     distr <- DDCRPPartition(similarity=similarity, mass=mass)
