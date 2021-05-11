@@ -10,5 +10,5 @@ NULL
 
 sample_epa <- function(n_samples, similarity, mass, discount, n_cores) .Call(wrap__sample_epa, n_samples, similarity, mass, discount, n_cores)
 
-caviarpd <- function(n_samples, similarity, mass, discount, use_vi, n_runs, max_size, n_cores) .Call(wrap__caviarpd, n_samples, similarity, mass, discount, use_vi, n_runs, max_size, n_cores)
+caviarpd_n_clusters <- function(n_samples, similarity, mass, discount, use_vi, n_runs, max_size, n_cores) .Call(wrap__caviarpd_n_clusters, n_samples, similarity, mass, discount, use_vi, n_runs, max_size, n_cores)
 

@@ -77,7 +77,7 @@ fn sample_epa(
 }
 
 #[extendr]
-fn caviarpd(
+fn caviarpd_n_clusters(
     n_samples: i32,
     similarity: Robj,
     mass: f64,
@@ -86,7 +86,7 @@ fn caviarpd(
     n_runs: i32,
     max_size: i32,
     n_cores: i32,
-) -> Vec<i32> {
+) -> i32 {
     let (samples, n_clusters) = sample_epa_engine(n_samples, &similarity, mass, discount, n_cores);
     let n_items = similarity.nrows();
     let n_samples = samples.len() / n_items;
@@ -117,7 +117,7 @@ fn caviarpd(
         n_cores as u32,
         &mut rng,
     );
-    fit.clustering.into_iter().map(|x| (x+1) as i32).collect()
+    (fit.clustering.into_iter().max().unwrap() + 1) as i32
 }
 
 // Macro to generate exports.
@@ -126,5 +126,5 @@ fn caviarpd(
 extendr_module! {
     mod caviarpd;
     fn sample_epa;
-    fn caviarpd;
+    fn caviarpd_n_clusters;
 }

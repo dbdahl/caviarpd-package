@@ -11,7 +11,7 @@ caviarPD(
   discount = 0,
   loss = "VI",
   nSamples = 100,
-  maxSize = 0,
+  maxNClusters = 0,
   samplesOnly = FALSE,
   distr = "EPA",
   nCores = 0
@@ -30,7 +30,7 @@ caviarPD(
 
 \item{nSamples}{The number of samples used to estimate the loss function in the salso method.}
 
-\item{maxSize}{Restriction parameter for the maximum number of clusters in the clustering estimate.}
+\item{maxNClusters}{Restriction parameter for the maximum number of clusters in the clustering estimate.}
 
 \item{samplesOnly}{If TRUE, returns only the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.}
 
@@ -47,7 +47,7 @@ Returns a clustering estimate given pairwise distances. Users can also specify p
 \examples{
 iris.dis <- dist(iris[,-5])
 caviarPD(distance=iris.dis, nSamples=10)
-caviarPD(distance=iris.dis, mass=0.75, loss="binder", nSamples=10, maxSize=3)
+caviarPD(distance=iris.dis, mass=0.75, loss="binder", nSamples=10, maxNClusters=3)
 # In practice the user should use at least 100 samples, but for ease of testing we use less here.
 
 }

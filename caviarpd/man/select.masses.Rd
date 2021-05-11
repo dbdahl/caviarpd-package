@@ -12,6 +12,7 @@ select.masses(
   discount = 0,
   temperature = 10,
   loss = "binder",
+  maxNClusters = 0,
   nSamplesA = 500,
   nSamplesB = 1000,
   w = c(1, 1, 0),
@@ -32,6 +33,8 @@ select.masses(
 \item{temperature}{A positive number that accentuates or dampens distance between observations.}
 
 \item{loss}{The salso method aims to estimate this loss function when searching the partition space for an optimal estimate, must be specified as either "binder" or "VI".}
+
+\item{maxNClusters}{Restriction parameter for the maximum number of clusters in the clustering estimate.}
 
 \item{nSamplesA}{Number of samples used by the salso method to repeatedly calculate the cluster count for each attempted mass value.}
 

@@ -9,6 +9,7 @@
 #' @param temperature A positive number that accentuates or dampens distance between observations.
 #' @param discount Typically 0, controls the distribution of subset sizes.
 #' @param loss The salso method aims to estimate this loss function when searching the partition space for an optimal estimate, must be specified as either "binder" or "VI".
+#' @param maxNClusters Restriction parameter for the maximum number of clusters in the clustering estimate.
 #' @param nSamplesA Number of samples used by the salso method to repeatedly calculate the cluster count for each attempted mass value.
 #' @param nSamplesB Number of samples used by the salso method to obtain the optimal mass; only applicable if single=TRUE.
 #' @param w Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance trio, and the last is attached to the nunber of clusters.
@@ -28,7 +29,7 @@
 #' @importFrom stats dist uniroot var median
 #'
 select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0, temperature=10.0,
-                          loss='binder', nSamplesA=500, nSamplesB=1000, w=c(1,1,0), nCores=0) {
+                          loss='binder', maxNClusters=0, nSamplesA=500, nSamplesB=1000, w=c(1,1,0), nCores=0) {
 
   ### ERROR CHECKING ###
   if (class(distance) != 'dist') stop(" 'distance' argument must be an object of class 'dist' ")
@@ -40,7 +41,10 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
 
   nsubsets.average <- function(mass, n) sum(mass / (mass + 1:n - 1))
   nsubsets.variance <- function(mass, n) sum((mass * (1:n - 1)) / (mass + 1:n - 1)^2)
-  nclust <- function(mass, distance, loss='binder') { length(unique(caviarPD(distance=distance, mass, temperature=temperature, discount=discount, loss=loss, nSamples=nSamplesA, nCores=nCores))) }
+  similarity <- exp( -temperature * as.matrix(distance) )
+  nclust <- function(mass) {
+    caviarpd_n_clusters(nSamplesA, similarity, mass, discount, loss=="VI", 16, maxNClusters, nCores)
+  }
 
   bounds.by.ncl <- function(ncl.range, nSD=3) {
 
@@ -80,19 +84,19 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
   ################################################
 
   n <- nrow(df)
-  func2 <- function(ncl, distance, loss) { function(mass) { nclust(mass, distance, loss) - ncl } }
+  func2 <- function(ncl) { function(mass) { nclust(mass) - ncl } }
   boundsA <- c(df$Lower[1], df$Upper[1])
   boundsB <- c(df$Lower[n], df$Upper[n])
-  masses[1] <- tryCatch( uniroot(func2(ncls[1], distance, loss), boundsA)$root, error=function(e) NA)
-  masses[n] <- tryCatch( uniroot(func2(ncls[n], distance, loss), boundsB)$root, error=function(e) NA)
+  masses[1] <- tryCatch( uniroot(func2(ncls[1]), boundsA)$root, error=function(e) NA)
+  masses[n] <- tryCatch( uniroot(func2(ncls[n]), boundsB)$root, error=function(e) NA)
   for (i in 2:(n/2)) {
     bounds <- c(max(df$Lower[i], masses[i-1], na.rm=TRUE), min(df$Upper[i], masses[n-i+2], na.rm=TRUE))
-    masses[i] <- tryCatch( uniroot(func2(ncls[i], distance, loss), bounds)$root, error=function(e) NA)
-    masses[n-i+1] <- tryCatch( uniroot(func2(ncls[n-i+1], distance, loss), bounds)$root, error=function(e) NA)
+    masses[i] <- tryCatch( uniroot(func2(ncls[i]), bounds)$root, error=function(e) NA)
+    masses[n-i+1] <- tryCatch( uniroot(func2(ncls[n-i+1]), bounds)$root, error=function(e) NA)
   }
   if (n %% 2 == 1) {
     k <- median(1:length(ncls))
-    masses[k] <- tryCatch( uniroot(func2(ncls[k], distance, loss), boundsA)$root, error=function(e) NA)
+    masses[k] <- tryCatch( uniroot(func2(ncls[k]), boundsA)$root, error=function(e) NA)
   }
 
 
@@ -149,8 +153,9 @@ single.mass <- function(masses, distance, temperature=10.0, discount=0.0, nSampl
   wc_var <- numeric(length(masses))
   total_var <- numeric(length(masses))
   ncl <- numeric(length(masses))
+  similarity <- exp( -temperature * as.matrix(distance) )
   for (i in 1:length(masses)) {
-    b <- caviarPD(distance, masses[i], temperature=temperature, discount=discount, nSamples=nSamples, samplesOnly=TRUE, nCores=nCores)
+    b <- sample_epa(nSamples, similarity, masses[i], discount, nCores)
     x <- salso(b, loss=loss)
     psmat <- psm(b)
     ncl[i] <- length(unique(x))
