@@ -10,8 +10,8 @@
 #' @param discount Typically 0, controls the distribution of subset sizes.
 #' @param loss The salso method aims to estimate this loss function when searching the partition space for an optimal estimate, must be specified as either "binder" or "VI".
 #' @param maxNClusters Restriction parameter for the maximum number of clusters in the clustering estimate.
-#' @param nSamplesA Number of samples used by the salso method to repeatedly calculate the cluster count for each attempted mass value.
-#' @param nSamplesB Number of samples used by the salso method to obtain the optimal mass; only applicable if single=TRUE.
+#' @param nSamples Number of samples used by the salso method to repeatedly calculate the cluster count for each attempted mass value.
+#' @param nSamplesFinal Number of samples used by the salso method to obtain the optimal mass; only applicable if single=TRUE.
 #' @param w Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance trio, and the last is attached to the nunber of clusters.
 #' @param nCores The number of CPU cores to use. A value of zero indicates to use all cores on the system.
 #'
@@ -21,15 +21,15 @@
 #' @examples
 #' tooth.dis <- dist(scale(ToothGrowth[,-2]))
 #' # In practice, use at least 100 samples and multiple cores. Less here for fast-running examples.
-#' select.masses(tooth.dis, ncl.range=c(2,4), nSamplesA=10, nSamplesB=10, nCores=1)
+#' select.masses(tooth.dis, ncl.range=c(2,4), nSamples=10, nSamplesFinal=10, nCores=1)
 #' iris.dis <- dist(iris[,-5])
-#' select.masses(iris.dis, ncl.range=c(3,6), single=TRUE, nSamplesA=10, nSamplesB=10, nCores=1)
+#' select.masses(iris.dis, ncl.range=c(3,6), single=TRUE, nSamples=10, nSamplesFinal=10, nCores=1)
 #'
 #' @export
 #' @importFrom stats dist uniroot var median
 #'
 select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0, temperature=10.0,
-                          loss='binder', maxNClusters=0, nSamplesA=500, nSamplesB=1000, w=c(1,1,0), nCores=0) {
+                          loss='binder', maxNClusters=0, nSamples=500, nSamplesFinal=1000, w=c(1,1,0), nCores=0) {
 
   ### ERROR CHECKING ###
   if (class(distance) != 'dist') stop(" 'distance' argument must be an object of class 'dist' ")
@@ -43,7 +43,7 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
   nsubsets.variance <- function(mass, n) sum((mass * (1:n - 1)) / (mass + 1:n - 1)^2)
   similarity <- exp( -temperature * as.matrix(distance) )
   nclust <- function(mass) {
-    caviarpd_n_clusters(nSamplesA, similarity, mass, discount, loss=="VI", 16, maxNClusters, nCores)
+    caviarpd_n_clusters(nSamples, similarity, mass, discount, loss=="VI", 16, maxNClusters, nCores)
   }
 
   bounds.by.ncl <- function(ncl.range, nSD=3) {
@@ -109,7 +109,7 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
   if (single==FALSE) {
     return(mat)
   } else {
-    final_mass <- single.mass(masses[!is.na(masses)], distance, temperature=temperature, discount=discount, nSamples=nSamplesB, w=w, loss=loss)
+    final_mass <- single.mass(masses[!is.na(masses)], distance, temperature=temperature, discount=discount, nSamples=nSamplesFinal, w=w, loss=loss)
     return(list(masses=mat, best=final_mass))
   }
 }
@@ -133,7 +133,7 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
 #' @examples
 #' iris.dis <- dist(iris[,-5])
 #' # In practice, use at least 100 samples and multiple cores. Less here for fast-running examples.
-#' iris.masses <- select.masses(iris.dis, ncl.range=c(3,6), nSamplesA=10, nSamplesB=10, nCores=1)
+#' iris.masses <- select.masses(iris.dis, ncl.range=c(3,6), nSamples=10, nSamplesFinal=10, nCores=1)
 #' single.mass(masses=iris.masses, distance=iris.dis, nSamples=10, nCores=1)
 #' single.mass(masses=seq(.5, 2, by=.25), distance=iris.dis, nSamples=10, nCores=1)
 #'
