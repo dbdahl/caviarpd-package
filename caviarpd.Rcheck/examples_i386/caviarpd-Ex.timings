@@ -1,0 +1,6 @@
+name	user	system	elapsed
+caviarPD	0.11	0.03	0.08	
+jaccard	0.03	0.02	0.04	
+loss.indexes	2.21	0.02	0.42	
+select.masses	0.63	0.04	0.64	
+single.mass	1.05	0.08	0.92	

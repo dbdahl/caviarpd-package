@@ -1,0 +1,8 @@
+C:\Users\andro\OneDrive\Desktop\School\research\rpackage\caviarpd\CAVIAR~1.RCH\00_PKG~1\caviarpd\src-i386\rustlib\target\release\deps\unicode_xid-1fc7952f0456aef3.rmeta: C:\Users\andro\AppData\Local\Temp\RtmpgJqkr9\working_dir\Rtmp0AYklo\cargo\registry\src\github.com-1ecc6299db9ec823\unicode-xid-0.2.2\src\lib.rs C:\Users\andro\AppData\Local\Temp\RtmpgJqkr9\working_dir\Rtmp0AYklo\cargo\registry\src\github.com-1ecc6299db9ec823\unicode-xid-0.2.2\src\tables.rs
+
+C:\Users\andro\OneDrive\Desktop\School\research\rpackage\caviarpd\CAVIAR~1.RCH\00_PKG~1\caviarpd\src-i386\rustlib\target\release\deps\libunicode_xid-1fc7952f0456aef3.rlib: C:\Users\andro\AppData\Local\Temp\RtmpgJqkr9\working_dir\Rtmp0AYklo\cargo\registry\src\github.com-1ecc6299db9ec823\unicode-xid-0.2.2\src\lib.rs C:\Users\andro\AppData\Local\Temp\RtmpgJqkr9\working_dir\Rtmp0AYklo\cargo\registry\src\github.com-1ecc6299db9ec823\unicode-xid-0.2.2\src\tables.rs
+
+C:\Users\andro\OneDrive\Desktop\School\research\rpackage\caviarpd\CAVIAR~1.RCH\00_PKG~1\caviarpd\src-i386\rustlib\target\release\deps\unicode_xid-1fc7952f0456aef3.d: C:\Users\andro\AppData\Local\Temp\RtmpgJqkr9\working_dir\Rtmp0AYklo\cargo\registry\src\github.com-1ecc6299db9ec823\unicode-xid-0.2.2\src\lib.rs C:\Users\andro\AppData\Local\Temp\RtmpgJqkr9\working_dir\Rtmp0AYklo\cargo\registry\src\github.com-1ecc6299db9ec823\unicode-xid-0.2.2\src\tables.rs
+
+C:\Users\andro\AppData\Local\Temp\RtmpgJqkr9\working_dir\Rtmp0AYklo\cargo\registry\src\github.com-1ecc6299db9ec823\unicode-xid-0.2.2\src\lib.rs:
+C:\Users\andro\AppData\Local\Temp\RtmpgJqkr9\working_dir\Rtmp0AYklo\cargo\registry\src\github.com-1ecc6299db9ec823\unicode-xid-0.2.2\src\tables.rs:

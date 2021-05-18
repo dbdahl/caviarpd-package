@@ -1,0 +1,10 @@
+caviarPD                Cluster Analysis via Random Partition
+                        Distributions
+helloWorld              My First Function
+jaccard                 Jaccard Distance for Categorical Attributes
+loss.indexes            Accuracy for a List of Clustering Estimates
+                        through Loss Functions
+select.masses           Mass Parameter Selection for the CaviarPD
+                        Procedure
+single.mass             Single Mass Parameter Selection for the
+                        CaviarPD Procedure

@@ -1,0 +1,12 @@
+cargo:rustc-env=R_HOME=C:/PROGRA~1/R/R-40~1.5
+cargo:r_home=C:/PROGRA~1/R/R-40~1.5
+cargo:rustc-link-search=C:/PROGRA~1/R/R-40~1.5\bin\x64
+cargo:rustc-link-lib=dylib=R
+cargo:rerun-if-changed=build.rs
+cargo:rerun-if-changed=wrapper.h
+cargo:r_version_major=4
+cargo:r_version_minor=0
+cargo:r_version_patch=5
+cargo:r_version_devel=false
+cargo:r_version_string="R version 4.0.5 (2021-03-31)"
+cargo:rerun-if-changed=bindings\bindings-windows-x86_64-R4.0.rs

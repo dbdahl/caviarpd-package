@@ -1,0 +1,1 @@
+{"rustc":7818900188288304833,"features":"","target":0,"profile":0,"path":0,"deps":[[12299137407290205711,"build_script_build",false,5912294103704857168]],"local":[{"RerunIfChanged":{"output":"i686-pc-windows-gnu\\release\\build\\libR-sys-fe8afa20f803b42a\\output","paths":["build.rs","wrapper.h","bindings\\bindings-windows-x86-R4.0.rs"]}}],"rustflags":[],"metadata":0,"config":0}

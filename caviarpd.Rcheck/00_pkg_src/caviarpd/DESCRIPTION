@@ -1,0 +1,28 @@
+Package: caviarpd
+Type: Package
+Title: Cluster Analysis via Random Partition Distributions
+Version: 0.2.3
+Authors@R: c(person(given="David B.",family="Dahl",role=c("aut","cre"),email="dahl@stat.byu.edu",comment=c(ORCID="0000-0002-8173-1547")), 
+             person(given="Brandon",family="Carter",role=c("aut"),email="carterj4@icloud.com"),
+             person(given="Jacob", family="Andros", role=c("aut"),email="androsrj@gmail.com"))
+Description: CaviarPD uses random partition distributions and pairwise distance information to perform 
+             cluster analysis. This package contains the implementation of this clustering 
+             method, compatible with both the EPA and ddCRP distributions. Users can simply 
+             draw samples from these distributions, or draw samples and then use them to obtain 
+             and plot clustering estimates. Implementations for mass selection algorithms are 
+             also given since a mass parameter is required to obtain a clustering estimate. 
+             Since pairwise distances make up the input to this procedure, CaviarPD is most 
+             comparable to hierarchical clustering. 
+License: MIT + file LICENSE | Apache License 2.0
+Depends: R (>= 3.5.0), salso (>= 0.2.20)
+LinkingTo: cargo (>= 0.1.29)
+SystemRequirements: Cargo (>= 1.49.0) for installation from sources:
+        see file INSTALL
+Encoding: UTF-8
+RoxygenNote: 7.1.1
+NeedsCompilation: yes
+Packaged: 2021-05-18 17:54:32 UTC; andro
+Author: David B. Dahl [aut, cre] (<https://orcid.org/0000-0002-8173-1547>),
+  Brandon Carter [aut],
+  Jacob Andros [aut]
+Maintainer: David B. Dahl <dahl@stat.byu.edu>
