@@ -9,6 +9,7 @@ crate-type = [ 'staticlib' ]
 [dependencies]
 extendr-api = "0.2"
 rand = "0.8.3"
+rand_pcg = "0.3.0"
 crossbeam = "0.8.0"
 num_cpus = "1.13.0"
 dahl-salso = "0.5.6"

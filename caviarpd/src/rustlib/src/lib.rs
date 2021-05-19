@@ -4,14 +4,22 @@ use dahl_salso::{LabelType, LossFunction, PartitionDistributionInformation};
 use epa::epa::{sample, EpaParameters, SquareMatrixBorrower};
 use epa::perm::Permutation;
 use extendr_api::prelude::*;
-use rand::thread_rng;
+use rand_pcg::Pcg64Mcg;
+use std::convert::TryInto;
+use rand::Rng;
 
-fn sample_epa_engine(
+fn seed_to_rng(seed: Robj) -> Pcg64Mcg {
+    let seed = seed.as_raw().unwrap().0;
+    Pcg64Mcg::new(u128::from_le_bytes(seed.try_into().unwrap()))
+}
+
+fn sample_epa_engine<T: Rng>(
     n_samples: i32,
     similarity: &Robj,
     mass: f64,
     discount: f64,
     n_cores: i32,
+    rng: &mut T,
 ) -> (Vec<LabelType>, Vec<LabelType>) {
     let n_samples = n_samples as usize;
     let n_items = similarity.nrows();
@@ -32,15 +40,15 @@ fn sample_epa_engine(
         for _ in 0..n_cores - 1 {
             let (left1, right1) = stick1.split_at_mut(chunk_size);
             let (left2, right2) = stick2.split_at_mut(n_samples_per_core);
-            plan.push((left1, left2));
+            plan.push((left1, left2, rng.gen::<u128>()));
             stick1 = right1;
             stick2 = right2;
         }
-        plan.push((stick1, stick2));
+        plan.push((stick1, stick2, rng.gen()));
         let sim = SquareMatrixBorrower::from_slice(similarity.as_real_slice().unwrap(), n_items);
         plan.into_iter().for_each(|p| {
             s.spawn(move |_| {
-                let mut rng = thread_rng();
+                let mut rng = Pcg64Mcg::new(p.2);
                 let mut params =
                     EpaParameters::new(sim, Permutation::natural(n_items), mass, discount).unwrap();
                 for i in 0..n_samples_per_core {
@@ -63,8 +71,10 @@ fn sample_epa(
     mass: f64,
     discount: f64,
     n_cores: i32,
+    seed: Robj
 ) -> RMatrix<Vec<i32>> {
-    let (samples, _) = sample_epa_engine(n_samples, &similarity, mass, discount, n_cores);
+    let mut rng = seed_to_rng(seed);
+    let (samples, _) = sample_epa_engine(n_samples, &similarity, mass, discount, n_cores, &mut rng);
     let n_samples = n_samples as usize;
     let n_items = similarity.nrows();
     let mut result = Vec::with_capacity(n_samples * n_items);
@@ -86,11 +96,12 @@ fn caviarpd_n_clusters(
     n_runs: i32,
     max_size: i32,
     n_cores: i32,
+    seed: Robj
 ) -> i32 {
-    let (samples, n_clusters) = sample_epa_engine(n_samples, &similarity, mass, discount, n_cores);
+    let mut rng = seed_to_rng(seed);
+    let (samples, n_clusters) = sample_epa_engine(n_samples, &similarity, mass, discount, n_cores, &mut rng);
     let n_items = similarity.nrows();
     let n_samples = samples.len() / n_items;
-    let mut rng = thread_rng();
     let clusterings = Clusterings::unvalidated(n_samples, n_items, samples, n_clusters);
     let pdi = PartitionDistributionInformation::Draws(&clusterings);
     let a = 1.0;

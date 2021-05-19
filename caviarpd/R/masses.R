@@ -43,7 +43,7 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
   nsubsets.variance <- function(mass, n) sum((mass * (1:n - 1)) / (mass + 1:n - 1)^2)
   similarity <- exp( -temperature * as.matrix(distance) )
   nclust <- function(mass) {
-    caviarpd_n_clusters(nSamples, similarity, mass, discount, loss=="VI", 16, maxNClusters, nCores)
+    caviarpd_n_clusters(nSamples, similarity, mass, discount, loss=="VI", 16, maxNClusters, nCores, mkSeed())
   }
 
   bounds.by.ncl <- function(ncl.range, nSD=3) {
@@ -155,7 +155,7 @@ single.mass <- function(masses, distance, temperature=10.0, discount=0.0, nSampl
   ncl <- numeric(length(masses))
   similarity <- exp( -temperature * as.matrix(distance) )
   for (i in 1:length(masses)) {
-    b <- sample_epa(nSamples, similarity, masses[i], discount, nCores)
+    b <- sample_epa(nSamples, similarity, masses[i], discount, nCores, mkSeed())
     x <- salso(b, loss=loss)
     psmat <- psm(b)
     ncl[i] <- length(unique(x))
