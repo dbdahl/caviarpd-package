@@ -1,11 +1,11 @@
 #' Jaccard Distance for Categorical Attributes
 #'
-#' Computes the pairwise distance matrix for categorical variables.
+#' Computes the Jaccard pairwise distance matrix for categorical variables.
 #'
-#' @param data The data set of categorical variables for which the jaccard distance is computed.
+#' @param data The data set of categorical variables for which the Jaccard distance is computed.
 #'
-#' @return An object of class "dist", which can easily be converted to an symmetric \eqn{n*n}
-#' matrix. See the dist() function documentation for more details.
+#' @return An object of class "dist", which can be converted to an symmetric \eqn{n*n}
+#' matrix. See the \code{\link[stats]{dist}} function documentation for details.
 #'
 #' @examples
 #' jaccard(npk[,-5])

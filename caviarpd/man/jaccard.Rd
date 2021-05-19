@@ -7,14 +7,14 @@
 jaccard(data)
 }
 \arguments{
-\item{data}{The data set of categorical variables for which the jaccard distance is computed.}
+\item{data}{The data set of categorical variables for which the Jaccard distance is computed.}
 }
 \value{
-An object of class "dist", which can easily be converted to an symmetric \eqn{n*n}
-matrix. See the dist() function documentation for more details.
+An object of class "dist", which can be converted to an symmetric \eqn{n*n}
+matrix. See the \code{\link[stats]{dist}} function documentation for details.
 }
 \description{
-Computes the pairwise distance matrix for categorical variables.
+Computes the Jaccard pairwise distance matrix for categorical variables.
 }
 \examples{
 jaccard(npk[,-5])

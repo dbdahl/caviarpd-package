@@ -22,19 +22,19 @@ caviarPD(
 
 \item{temperature}{A positive number that accentuates or dampens distance between observations.}
 
-\item{mass}{The main tuning parameter; higher mass leads to more clusters.}
+\item{mass}{The main tuning parameter for the number of clusters. Higher mass value tend to lead to more clusters.}
 
-\item{discount}{Typically 0, controls the distribution of subset sizes.}
+\item{discount}{A number in \eqn{[0,1)} giving the discount parameter to control the distribution of subset sizes.}
 
-\item{loss}{The salso method aims to estimate this loss function when searching the partition space for an optimal estimate, must be specified as either "binder" or "VI".}
+\item{loss}{The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".}
 
-\item{nSamples}{The number of samples used to estimate the loss function in the salso method.}
+\item{nSamples}{Number of samples used to estimate the partition confidence and variance ratio for each mass value obtained from the search algorithm; only applicable if single=TRUE.}
 
-\item{maxNClusters}{Restriction parameter for the maximum number of clusters in the clustering estimate.}
+\item{maxNClusters}{The maximum number of clusters that can be considered by the optimization algorithm.}
 
-\item{samplesOnly}{If TRUE, returns only the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.}
+\item{samplesOnly}{If TRUE, the function only returns the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.}
 
-\item{distr}{The random partition distribution used to generate samples, must be specified as either "EPA" or "ddCRP".}
+\item{distr}{The random partition distribution used to generate samples.  This must be specified as either "EPA" or "ddCRP".}
 
 \item{nCores}{The number of CPU cores to use. A value of zero indicates to use all cores on the system.}
 }
@@ -50,4 +50,8 @@ caviarPD(distance=iris.dis, nSamples=10)
 caviarPD(distance=iris.dis, mass=0.75, loss="binder", nSamples=10, maxNClusters=3)
 # In practice the user should use at least 100 samples, but for ease of testing we use less here.
 
+}
+\references{
+D. B. Dahl, D. J. Johnson, and P. Müller (2021), Search Algorithms and Loss
+Functions for Bayesian Clustering, <arXiv:2105.04451>.
 }

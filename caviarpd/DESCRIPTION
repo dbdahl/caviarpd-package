@@ -5,14 +5,10 @@ Version: 0.2.3
 Authors@R: c(person(given="David B.",family="Dahl",role=c("aut","cre"),email="dahl@stat.byu.edu",comment=c(ORCID="0000-0002-8173-1547")), 
              person(given="Brandon",family="Carter",role=c("aut"),email="carterj4@icloud.com"),
              person(given="Jacob", family="Andros", role=c("aut"),email="androsrj@gmail.com"))
-Description: CaviarPD uses random partition distributions and pairwise distance information to perform 
-             cluster analysis. This package contains the implementation of this clustering 
-             method, compatible with both the EPA and ddCRP distributions. Users can simply 
-             draw samples from these distributions, or draw samples and then use them to obtain 
-             and plot clustering estimates. Implementations for mass selection algorithms are 
-             also given since a mass parameter is required to obtain a clustering estimate. 
-             Since pairwise distances make up the input to this procedure, CaviarPD is most 
-             comparable to hierarchical clustering. 
+Description: Cluster analysis is performed using pairwise distance information and a random partition distribution. The method is
+             implemented for two random partition distributions. It draws samples and then obtains and plot clustering estimates.
+             An implementation of a mass selection algorithm is provided. Since pairwise distances are the principal input to this
+             procedure, it is most comparable to hierarchical clustering and k-medoids. 
 License: MIT + file LICENSE | Apache License 2.0
 Depends: R (>= 3.5.0), salso (>= 0.2.20)
 LinkingTo: cargo (>= 0.1.29)

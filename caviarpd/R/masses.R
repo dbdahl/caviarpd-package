@@ -2,34 +2,26 @@
 #'
 #' User inputs a range of clustering sizes to obtain a mass value that can viably correspond to each cluster count.
 #'
-#' @param distance Pairwise distance matrix of class 'dist'.
+#' @inheritParams caviarPD
 #' @param ncl.range A vector of two values representing the minimum and maximum number of clusters that the user wishes to consider in selecting mass values.
-#' @param single If TRUE, the algorithm returns both a list of masses for each targeted cluster count as well as a best overal mass selected from that list.
+#' @param single If TRUE, the algorithm returns both a list of masses for each targeted cluster count as well as a best overall mass selected from that list.
 #' @param nSD Number of standard deviations in the EPA distribution to consider for a range of mass values; lower values allow the algorithm to run more quickly but risk an error if deemed insufficient.
-#' @param temperature A positive number that accentuates or dampens distance between observations.
-#' @param discount Typically 0, controls the distribution of subset sizes.
-#' @param loss The salso method aims to estimate this loss function when searching the partition space for an optimal estimate, must be specified as either "binder" or "VI".
-#' @param maxNClusters Restriction parameter for the maximum number of clusters in the clustering estimate.
-#' @param nSamples Number of samples used for each iteration of the search algorithm to find the mass value corresponding to a desired number of clusters. Setting this argument too high can result in intensive and lengthy computations.
-#' @param nSamplesFinal Number of samples used to estimate the partition confidence and variance ratio for each mass value obtained from the search algorithm; only applicable if single=TRUE.
-#' @param w Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance trio, and the last is attached to the nunber of clusters.
-#' @param nCores The number of CPU cores to use. A value of zero indicates to use all cores on the system.
+#' @param nSamplesSearch Number of samples used for each iteration of the search algorithm to find the mass value corresponding to a desired number of clusters. Setting this argument too high can result in long computations.
 #'
-#' @return If single==FALSE, returns a list with two elements: a chain of mass values corresponding to each cluster count,
+#' @return If single==FALSE, returns a list with two elements: a chain of mass values corresponding to each cluster count
 #' and the mass value that had the best overall confidence plot. If single==TRUE, returns only the best overall mass value.
 #'
-#' @examples
-#' tooth.dis <- dist(scale(ToothGrowth[,-2]))
-#' # In practice, use at least 100 samples and multiple cores. Less here for fast-running examples.
-#' select.masses(tooth.dis, ncl.range=c(2,4), nSamples=10, nSamplesFinal=10, nCores=1)
-#' iris.dis <- dist(iris[,-5])
-#' select.masses(iris.dis, ncl.range=c(3,6), single=TRUE, nSamples=10, nSamplesFinal=10, nCores=1)
+#' @references
 #'
+#' D. B. Dahl, D. J. Johnson, and P. Müller (2021), Search Algorithms and Loss
+#' Functions for Bayesian Clustering, <arXiv:2105.04451>.
+#'
+#' @example man/examples/select.masses.R
 #' @export
 #' @importFrom stats dist uniroot var median
 #'
 select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0, temperature=10.0,
-                          loss='binder', maxNClusters=0, nSamples=500, nSamplesFinal=1000, w=c(1,1,0), nCores=0) {
+                          loss='binder', maxNClusters=0, nSamplesSearch=500, nSamples=1000, w=c(1,1,0), nCores=0) {
 
   ### ERROR CHECKING ###
   if (class(distance) != 'dist') stop(" 'distance' argument must be an object of class 'dist' ")
@@ -43,7 +35,7 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
   nsubsets.variance <- function(mass, n) sum((mass * (1:n - 1)) / (mass + 1:n - 1)^2)
   similarity <- exp( -temperature * as.matrix(distance) )
   nclust <- function(mass) {
-    caviarpd_n_clusters(nSamples, similarity, mass, discount, loss=="VI", 16, maxNClusters, nCores, mkSeed())
+    caviarpd_n_clusters(nSamplesSearch, similarity, mass, discount, loss=="VI", 16, maxNClusters, nCores, mkSeed())
   }
 
   bounds.by.ncl <- function(ncl.range, nSD=3) {
@@ -99,9 +91,7 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
     masses[k] <- tryCatch( uniroot(func2(ncls[k]), boundsA)$root, error=function(e) NA)
   }
 
-
   ################################################
-
 
   # Run the single,mass function if an optimal mass value is needed, otherwise, just return the sequence of masses
   mat <- matrix(sort(masses), nrow=1)
@@ -109,7 +99,7 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
   if (single==FALSE) {
     return(mat)
   } else {
-    final_mass <- single.mass(masses[!is.na(masses)], distance, temperature=temperature, discount=discount, nSamples=nSamplesFinal, w=w, loss=loss)
+    final_mass <- single.mass(masses[!is.na(masses)], distance, temperature=temperature, discount=discount, nSamples=nSamples, w=w, loss=loss)
     return(list(masses=mat, best=final_mass))
   }
 }
@@ -117,28 +107,15 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
 
 #' Single Mass Parameter Selection for the CaviarPD Procedure
 #'
-#' Calculates the partition confidence and variance ratios for each mass value to find the best mass. User can input masses from the select.masses function or supply their own.
+#' Calculates the partition confidence and variance ratios for each mass value to find the best mass. Users can input masses from the \code{\link{select.masses}} function or supply their own.
 #'
+#' @inheritParams select.masses
 #' @param masses A vector of mass values from which to select the best mass. This can be a simple sequence for some range or a list of masses generated from the select.masses function.
-#' @param distance Pairwise distance matrix of class 'dist'.
-#' @param temperature A positive number that accentuates or dampens distance between observations.
-#' @param discount Typically 0, controls the distribution of subset sizes.
-#' @param nSamples The number of samples used to estimate the loss function in the salso method.
-#' @param w Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance trio, and the last is attached to the nunber of clusters.
-#' @param loss The salso method aims to estimate this loss function when searching the partition space for an optimal estimate, must be specified as either "binder" or "VI".
-#' @param nCores The number of CPU cores to use. A value of zero indicates to use all cores on the system.
 #'
-#' @return The value of the mass parameter that should be used in the caviarPD method for the given pairwise distance matrix.
+#' @return The value of the mass parameter that should be used in the CaviarPD method for the given pairwise distance matrix.
 #'
-#' @examples
-#' iris.dis <- dist(iris[,-5])
-#' # In practice, use at least 100 samples and multiple cores. Less here for fast-running examples.
-#' iris.masses <- select.masses(iris.dis, ncl.range=c(3,6), nSamples=10, nSamplesFinal=10, nCores=1)
-#' single.mass(masses=iris.masses, distance=iris.dis, nSamples=10, nCores=1)
-#' single.mass(masses=seq(.5, 2, by=.25), distance=iris.dis, nSamples=10, nCores=1)
-#'
+#' @example man/examples/single.mass.R
 #' @importFrom salso salso psm
-#'
 #' @export
 #'
 single.mass <- function(masses, distance, temperature=10.0, discount=0.0, nSamples=1000, w=c(1,1,0), loss='binder', nCores=0) {

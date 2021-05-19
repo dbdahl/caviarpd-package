@@ -8,6 +8,17 @@ DDCRPPartition <- function(similarity, mass) {
   result
 }
 
+checkSimilarity <- function(similarity) {
+  if ( ! is.matrix(similarity) ) stop("'similarity' must be a symmetric matrix of strictly positive enteries.")
+  if ( ! isSymmetric(similarity) ) stop("'similarity' must be a symmetric matrix of strictly positive enteries.")
+  if ( any( similarity <= 0 ) ) stop("'similarity' must be a symmetric matrix of strictly positive enteries.")
+}
+
+checkMassDiscount <- function(mass, discount) {
+  if ( ( discount < 0.0 ) || ( discount >= 1 ) ) stop("'discount' must be in [0,1).")
+  if ( mass <= -discount ) stop("'mass' must be greater than -'discount'.")
+}
+
 edgesToLabels <- function(edges) {
   n <- length(edges)
   labels <- integer(n)

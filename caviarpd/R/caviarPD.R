@@ -1,18 +1,24 @@
 #' Cluster Analysis via Random Partition Distributions
 #'
 #' Returns a clustering estimate given pairwise distances. Users can also specify parameters for the mass, discount, temperature, loss function, or number of samples.
+#'
 #' @param distance A pairwise distance matrix of class 'dist'.
-#' @param mass The main tuning parameter; higher mass leads to more clusters.
 #' @param temperature A positive number that accentuates or dampens distance between observations.
-#' @param discount Typically 0, controls the distribution of subset sizes.
-#' @param loss The salso method aims to estimate this loss function when searching the partition space for an optimal estimate, must be specified as either "binder" or "VI".
-#' @param nSamples The number of samples used to estimate the loss function in the salso method.
-#' @param maxNClusters Restriction parameter for the maximum number of clusters in the clustering estimate.
-#' @param samplesOnly If TRUE, returns only the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.
-#' @param distr The random partition distribution used to generate samples, must be specified as either "EPA" or "ddCRP".
+#' @param mass The main tuning parameter for the number of clusters. Higher mass value tend to lead to more clusters.
+#' @param discount A number in \eqn{[0,1)} giving the discount parameter to control the distribution of subset sizes.
+#' @param loss The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".
+#' @param nSamples Number of samples used to estimate the partition confidence and variance ratio for each mass value obtained from the search algorithm; only applicable if single=TRUE.
+#' @param maxNClusters The maximum number of clusters that can be considered by the optimization algorithm.
+#' @param samplesOnly If TRUE, the function only returns the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.
+#' @param distr The random partition distribution used to generate samples.  This must be specified as either "EPA" or "ddCRP".
 #' @param nCores The number of CPU cores to use. A value of zero indicates to use all cores on the system.
 #'
 #' @return A list containing two elements: the clustering estimate and the summary. The summary contains the pairwise probabilities for all samples and is used to create the confidence plots.
+#'
+#' @references
+#'
+#' D. B. Dahl, D. J. Johnson, and P. Müller (2021), Search Algorithms and Loss
+#' Functions for Bayesian Clustering, <arXiv:2105.04451>.
 #'
 #' @examples
 #' iris.dis <- dist(iris[,-5])

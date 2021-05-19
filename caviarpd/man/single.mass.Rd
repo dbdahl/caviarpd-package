@@ -18,31 +18,30 @@ single.mass(
 \arguments{
 \item{masses}{A vector of mass values from which to select the best mass. This can be a simple sequence for some range or a list of masses generated from the select.masses function.}
 
-\item{distance}{Pairwise distance matrix of class 'dist'.}
+\item{distance}{A pairwise distance matrix of class 'dist'.}
 
 \item{temperature}{A positive number that accentuates or dampens distance between observations.}
 
-\item{discount}{Typically 0, controls the distribution of subset sizes.}
+\item{discount}{A number in \eqn{[0,1)} giving the discount parameter to control the distribution of subset sizes.}
 
-\item{nSamples}{The number of samples used to estimate the loss function in the salso method.}
+\item{nSamples}{Number of samples used to estimate the partition confidence and variance ratio for each mass value obtained from the search algorithm; only applicable if single=TRUE.}
 
-\item{w}{Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance trio, and the last is attached to the nunber of clusters.}
+\item{w}{Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance ratio, and the last is attached to the number of clusters.}
 
-\item{loss}{The salso method aims to estimate this loss function when searching the partition space for an optimal estimate, must be specified as either "binder" or "VI".}
+\item{loss}{The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".}
 
 \item{nCores}{The number of CPU cores to use. A value of zero indicates to use all cores on the system.}
 }
 \value{
-The value of the mass parameter that should be used in the caviarPD method for the given pairwise distance matrix.
+The value of the mass parameter that should be used in the CaviarPD method for the given pairwise distance matrix.
 }
 \description{
-Calculates the partition confidence and variance ratios for each mass value to find the best mass. User can input masses from the select.masses function or supply their own.
+Calculates the partition confidence and variance ratios for each mass value to find the best mass. Users can input masses from the \code{\link{select.masses}} function or supply their own.
 }
 \examples{
 iris.dis <- dist(iris[,-5])
 # In practice, use at least 100 samples and multiple cores. Less here for fast-running examples.
-iris.masses <- select.masses(iris.dis, ncl.range=c(3,6), nSamples=10, nSamplesFinal=10, nCores=1)
+iris.masses <- select.masses(iris.dis, ncl.range=c(3,6), nSamplesSearch=10, nSamples=10, nCores=1)
 single.mass(masses=iris.masses, distance=iris.dis, nSamples=10, nCores=1)
 single.mass(masses=seq(.5, 2, by=.25), distance=iris.dis, nSamples=10, nCores=1)
-
 }

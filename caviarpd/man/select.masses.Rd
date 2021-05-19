@@ -13,39 +13,39 @@ select.masses(
   temperature = 10,
   loss = "binder",
   maxNClusters = 0,
-  nSamples = 500,
-  nSamplesFinal = 1000,
+  nSamplesSearch = 500,
+  nSamples = 1000,
   w = c(1, 1, 0),
   nCores = 0
 )
 }
 \arguments{
-\item{distance}{Pairwise distance matrix of class 'dist'.}
+\item{distance}{A pairwise distance matrix of class 'dist'.}
 
 \item{ncl.range}{A vector of two values representing the minimum and maximum number of clusters that the user wishes to consider in selecting mass values.}
 
-\item{single}{If TRUE, the algorithm returns both a list of masses for each targeted cluster count as well as a best overal mass selected from that list.}
+\item{single}{If TRUE, the algorithm returns both a list of masses for each targeted cluster count as well as a best overall mass selected from that list.}
 
 \item{nSD}{Number of standard deviations in the EPA distribution to consider for a range of mass values; lower values allow the algorithm to run more quickly but risk an error if deemed insufficient.}
 
-\item{discount}{Typically 0, controls the distribution of subset sizes.}
+\item{discount}{A number in \eqn{[0,1)} giving the discount parameter to control the distribution of subset sizes.}
 
 \item{temperature}{A positive number that accentuates or dampens distance between observations.}
 
-\item{loss}{The salso method aims to estimate this loss function when searching the partition space for an optimal estimate, must be specified as either "binder" or "VI".}
+\item{loss}{The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".}
 
-\item{maxNClusters}{Restriction parameter for the maximum number of clusters in the clustering estimate.}
+\item{maxNClusters}{The maximum number of clusters that can be considered by the optimization algorithm.}
 
-\item{nSamples}{Number of samples used for each iteration of the search algorithm to find the mass value corresponding to a desired number of clusters. Setting this argument too high can result in intensive and lengthy computations.}
+\item{nSamplesSearch}{Number of samples used for each iteration of the search algorithm to find the mass value corresponding to a desired number of clusters. Setting this argument too high can result in long computations.}
 
-\item{nSamplesFinal}{Number of samples used to estimate the partition confidence and variance ratio for each mass value obtained from the search algorithm; only applicable if single=TRUE.}
+\item{nSamples}{Number of samples used to estimate the partition confidence and variance ratio for each mass value obtained from the search algorithm; only applicable if single=TRUE.}
 
-\item{w}{Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance trio, and the last is attached to the nunber of clusters.}
+\item{w}{Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance ratio, and the last is attached to the number of clusters.}
 
 \item{nCores}{The number of CPU cores to use. A value of zero indicates to use all cores on the system.}
 }
 \value{
-If single==FALSE, returns a list with two elements: a chain of mass values corresponding to each cluster count,
+If single==FALSE, returns a list with two elements: a chain of mass values corresponding to each cluster count
 and the mass value that had the best overall confidence plot. If single==TRUE, returns only the best overall mass value.
 }
 \description{
@@ -54,8 +54,11 @@ User inputs a range of clustering sizes to obtain a mass value that can viably c
 \examples{
 tooth.dis <- dist(scale(ToothGrowth[,-2]))
 # In practice, use at least 100 samples and multiple cores. Less here for fast-running examples.
-select.masses(tooth.dis, ncl.range=c(2,4), nSamples=10, nSamplesFinal=10, nCores=1)
+select.masses(tooth.dis, ncl.range=c(2,4), nSamplesSearch=10, nSamples=10, nCores=1)
 iris.dis <- dist(iris[,-5])
-select.masses(iris.dis, ncl.range=c(3,6), single=TRUE, nSamples=10, nSamplesFinal=10, nCores=1)
-
+select.masses(iris.dis, ncl.range=c(3,6), single=TRUE, nSamplesSearch=10, nSamples=10, nCores=1)
+}
+\references{
+D. B. Dahl, D. J. Johnson, and P. Müller (2021), Search Algorithms and Loss
+Functions for Bayesian Clustering, <arXiv:2105.04451>.
 }
