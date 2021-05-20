@@ -3,14 +3,14 @@
 #' Returns a clustering estimate given pairwise distances. Users can also specify parameters for the mass, discount, temperature, loss function, or number of samples.
 #'
 #' @param distance A pairwise distance matrix of class 'dist'.
-#' @param temperature A positive number that accentuates or dampens distance between observations.
 #' @param mass The main tuning parameter for the number of clusters. A higher mass value tends to lead to more clusters.
-#' @param discount A number in \eqn{[0,1)} giving the discount parameter to control the distribution of subset sizes.
 #' @param loss The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".
 #' @param nSamples Number of samples used to estimate the partition confidence and variance ratio for each mass value obtained from the search algorithm; only applicable if single=TRUE.
-#' @param maxNClusters The maximum number of clusters that can be considered by the SALSO method.
 #' @param samplesOnly If TRUE, the function only returns the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.
 #' @param distr The random partition distribution used to generate samples.  This must be specified as either "EPA" or "ddCRP".
+#' @param temperature A positive number that accentuates or dampens distance between observations.
+#' @param discount A number in \eqn{[0,1)} giving the discount parameter to control the distribution of subset sizes.
+#' @param maxNClusters The maximum number of clusters that can be considered by the SALSO method.
 #' @param nCores The number of CPU cores to use. A value of zero indicates to use all cores on the system.
 #'
 #' @return A list containing two elements: the clustering estimate and the summary. The summary contains the pairwise probabilities for all samples and is used to create the confidence plots.
@@ -29,8 +29,8 @@
 #' @export
 #' @importFrom salso salso binder VI
 #'
-caviarPD <- function(distance, temperature=10.0, mass=1.0, discount=0.0, loss="binder",
-                     nSamples=1000, maxNClusters=0, samplesOnly=FALSE, distr="EPA", nCores=0) {
+caviarPD <- function(distance, mass=1.0, loss="binder", nSamples=1000, samplesOnly=FALSE,
+                     distr="EPA", temperature=10.0, discount=0.0, maxNClusters=0, nCores=0) {
 
   ### ERROR CHECKING ###
   if (class(distance) != 'dist') stop(" 'distance' argument must be an object of class 'dist' ")
