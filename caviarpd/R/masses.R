@@ -7,7 +7,7 @@
 #' @param single If TRUE, the algorithm returns both a list of masses for each targeted cluster count as well as a best overall mass selected from that list.
 #' @param nSD Number of standard deviations in the EPA distribution to consider for a range of mass values; lower values allow the algorithm to run more quickly, but also risk not finding the mass for some cluster counts.
 #' @param nSamplesSearch Number of samples used for each iteration of the search algorithm to find the mass value corresponding to a desired number of clusters. Setting this argument too high can result in long computations.
-#' @param w Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance trio, and the last is attached to the number of clusters.
+#' @param w Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance ratio, and the last is attached to the number of clusters. Setting the last weight to be nonzero gives priority to an estimate with fewer clusters.
 #'
 #' @return If single==FALSE, returns a list with two elements: a chain of mass values corresponding to each cluster count
 #' and the mass value that had the best overall confidence plot. If single==TRUE, returns only the best overall mass value.
