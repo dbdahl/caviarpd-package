@@ -4,11 +4,11 @@
 #'
 #' @param distance A pairwise distance matrix of class 'dist'.
 #' @param temperature A positive number that accentuates or dampens distance between observations.
-#' @param mass The main tuning parameter for the number of clusters. Higher mass value tend to lead to more clusters.
+#' @param mass The main tuning parameter for the number of clusters. A higher mass value tends to lead to more clusters.
 #' @param discount A number in \eqn{[0,1)} giving the discount parameter to control the distribution of subset sizes.
 #' @param loss The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".
 #' @param nSamples Number of samples used to estimate the partition confidence and variance ratio for each mass value obtained from the search algorithm; only applicable if single=TRUE.
-#' @param maxNClusters The maximum number of clusters that can be considered by the optimization algorithm.
+#' @param maxNClusters The maximum number of clusters that can be considered by the SALSO method.
 #' @param samplesOnly If TRUE, the function only returns the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.
 #' @param distr The random partition distribution used to generate samples.  This must be specified as either "EPA" or "ddCRP".
 #' @param nCores The number of CPU cores to use. A value of zero indicates to use all cores on the system.

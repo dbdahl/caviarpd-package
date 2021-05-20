@@ -5,9 +5,9 @@
 #' @inheritParams caviarPD
 #' @param ncl.range A vector of two values representing the minimum and maximum number of clusters that the user wishes to consider in selecting mass values.
 #' @param single If TRUE, the algorithm returns both a list of masses for each targeted cluster count as well as a best overall mass selected from that list.
-#' @param nSD Number of standard deviations in the EPA distribution to consider for a range of mass values; lower values allow the algorithm to run more quickly but risk an error if deemed insufficient.
+#' @param nSD Number of standard deviations in the EPA distribution to consider for a range of mass values; lower values allow the algorithm to run more quickly, but also risk not finding the mass for some cluster counts.
 #' @param nSamplesSearch Number of samples used for each iteration of the search algorithm to find the mass value corresponding to a desired number of clusters. Setting this argument too high can result in long computations.
-#' @param w Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance trio, and the last is attached to the nunber of clusters.
+#' @param w Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance trio, and the last is attached to the number of clusters.
 #'
 #' @return If single==FALSE, returns a list with two elements: a chain of mass values corresponding to each cluster count
 #' and the mass value that had the best overall confidence plot. If single==TRUE, returns only the best overall mass value.
@@ -77,19 +77,19 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
   ################################################
 
   n <- nrow(df)
-  func2 <- function(ncl) { function(mass) { nclust(mass) - ncl } }
+  func <- function(ncl) { function(mass) { nclust(mass) - ncl } }
   boundsA <- c(df$Lower[1], df$Upper[1])
   boundsB <- c(df$Lower[n], df$Upper[n])
-  masses[1] <- tryCatch( uniroot(func2(ncls[1]), boundsA)$root, error=function(e) NA)
-  masses[n] <- tryCatch( uniroot(func2(ncls[n]), boundsB)$root, error=function(e) NA)
+  masses[1] <- tryCatch( uniroot(func(ncls[1]), boundsA)$root, error=function(e) NA)
+  masses[n] <- tryCatch( uniroot(func(ncls[n]), boundsB)$root, error=function(e) NA)
   for (i in 2:(n/2)) {
     bounds <- c(max(df$Lower[i], masses[i-1], na.rm=TRUE), min(df$Upper[i], masses[n-i+2], na.rm=TRUE))
-    masses[i] <- tryCatch( uniroot(func2(ncls[i]), bounds)$root, error=function(e) NA)
-    masses[n-i+1] <- tryCatch( uniroot(func2(ncls[n-i+1]), bounds)$root, error=function(e) NA)
+    masses[i] <- tryCatch( uniroot(func(ncls[i]), bounds)$root, error=function(e) NA)
+    masses[n-i+1] <- tryCatch( uniroot(func(ncls[n-i+1]), bounds)$root, error=function(e) NA)
   }
   if (n %% 2 == 1) {
     k <- median(1:length(ncls))
-    masses[k] <- tryCatch( uniroot(func2(ncls[k]), boundsA)$root, error=function(e) NA)
+    masses[k] <- tryCatch( uniroot(func(ncls[k]), boundsA)$root, error=function(e) NA)
   }
 
   ################################################
