@@ -6,35 +6,35 @@
 \usage{
 caviarPD(
   distance,
-  temperature = 10,
   mass = 1,
-  discount = 0,
   loss = "binder",
   nSamples = 1000,
-  maxNClusters = 0,
   samplesOnly = FALSE,
   distr = "EPA",
+  temperature = 10,
+  discount = 0,
+  maxNClusters = 0,
   nCores = 0
 )
 }
 \arguments{
 \item{distance}{A pairwise distance matrix of class 'dist'.}
 
-\item{temperature}{A positive number that accentuates or dampens distance between observations.}
-
-\item{mass}{The main tuning parameter for the number of clusters. Higher mass value tend to lead to more clusters.}
-
-\item{discount}{A number in \eqn{[0,1)} giving the discount parameter to control the distribution of subset sizes.}
+\item{mass}{The main tuning parameter for the number of clusters. A higher mass value tends to lead to more clusters.}
 
 \item{loss}{The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".}
 
 \item{nSamples}{Number of samples used to estimate the partition confidence and variance ratio for each mass value obtained from the search algorithm; only applicable if single=TRUE.}
 
-\item{maxNClusters}{The maximum number of clusters that can be considered by the optimization algorithm.}
-
 \item{samplesOnly}{If TRUE, the function only returns the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.}
 
 \item{distr}{The random partition distribution used to generate samples.  This must be specified as either "EPA" or "ddCRP".}
+
+\item{temperature}{A positive number that accentuates or dampens distance between observations.}
+
+\item{discount}{A number in \eqn{[0,1)} giving the discount parameter to control the distribution of subset sizes.}
+
+\item{maxNClusters}{The maximum number of clusters that can be considered by the SALSO method.}
 
 \item{nCores}{The number of CPU cores to use. A value of zero indicates to use all cores on the system.}
 }

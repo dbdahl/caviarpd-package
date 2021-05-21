@@ -26,7 +26,7 @@ select.masses(
 
 \item{single}{If TRUE, the algorithm returns both a list of masses for each targeted cluster count as well as a best overall mass selected from that list.}
 
-\item{nSD}{Number of standard deviations in the EPA distribution to consider for a range of mass values; lower values allow the algorithm to run more quickly but risk an error if deemed insufficient.}
+\item{nSD}{Number of standard deviations in the EPA distribution to consider for a range of mass values; lower values allow the algorithm to run more quickly, but also risk not finding the mass for some cluster counts.}
 
 \item{discount}{A number in \eqn{[0,1)} giving the discount parameter to control the distribution of subset sizes.}
 
@@ -34,13 +34,13 @@ select.masses(
 
 \item{loss}{The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".}
 
-\item{maxNClusters}{The maximum number of clusters that can be considered by the optimization algorithm.}
+\item{maxNClusters}{The maximum number of clusters that can be considered by the SALSO method.}
 
 \item{nSamplesSearch}{Number of samples used for each iteration of the search algorithm to find the mass value corresponding to a desired number of clusters. Setting this argument too high can result in long computations.}
 
 \item{nSamples}{Number of samples used to estimate the partition confidence and variance ratio for each mass value obtained from the search algorithm; only applicable if single=TRUE.}
 
-\item{w}{Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance trio, and the last is attached to the nunber of clusters.}
+\item{w}{Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance ratio, and the last is attached to the number of clusters. Setting the last weight to be nonzero gives priority to an estimate with fewer clusters.}
 
 \item{nCores}{The number of CPU cores to use. A value of zero indicates to use all cores on the system.}
 }

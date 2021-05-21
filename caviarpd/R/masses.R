@@ -36,7 +36,7 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
   nsubsets.variance <- function(mass, n) sum((mass * (1:n - 1)) / (mass + 1:n - 1)^2)
   similarity <- exp( -temperature * as.matrix(distance) )
   nclust <- function(mass) {
-    caviarpd_n_clusters(nSamplesSearch, similarity, mass, discount, loss=="VI", 16, maxNClusters, nCores, mkSeed())
+    caviarpd_n_clusters(nSamplesSearch, similarity, mass, discount, loss="binder", 16, maxNClusters, nCores, mkSeed())
   }
 
   bounds.by.ncl <- function(ncl.range, nSD=3) {
@@ -55,7 +55,6 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
     UB <- numeric(length(ncl))
     LB <- numeric(length(ncl))
     mid <- numeric(length(ncl))
-    v <- numeric(length(ncl))
 
     # Get mass bounds and variance for each cluster count
     for (i in 1:length(ncl)) {
