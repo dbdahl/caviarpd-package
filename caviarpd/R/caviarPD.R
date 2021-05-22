@@ -22,9 +22,9 @@
 #'
 #' @examples
 #' iris.dis <- dist(iris[,-5])
-#' caviarPD(distance=iris.dis, nSamples=10)
-#' caviarPD(distance=iris.dis, mass=0.75, loss="binder", nSamples=10, maxNClusters=3)
 #' # In practice the user should use at least 100 samples, but for ease of testing we use less here.
+#' caviarPD(distance=iris.dis, nSamples=10, nCores=1)
+#' caviarPD(distance=iris.dis, mass=0.75, loss="binder", nSamples=10, maxNClusters=3, nCores=1)
 #'
 #' @export
 #' @importFrom salso salso binder VI
@@ -44,7 +44,7 @@ caviarPD <- function(distance, mass=1.0, loss="binder", nSamples=1000, samplesOn
 
   similarity <- exp( -temperature * as.matrix(distance) )
   samples <- if (distr=="EPA") {
-    sample_epa(nSamples, similarity, mass, discount, nCores, mkSeed())
+    .Call(.sample_epa,nSamples, similarity, mass, discount, nCores, mkSeed())
   } else if (distr=="ddCRP") {
     samplePartition(DDCRPPartition(similarity=similarity, mass=mass), nSamples, randomizePermutation=TRUE)
   } else {

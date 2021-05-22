@@ -60,5 +60,5 @@ select.masses(iris.dis, ncl.range=c(3,6), single=TRUE, nSamplesSearch=10, nSampl
 }
 \references{
 D. B. Dahl, D. J. Johnson, and P. Müller (2021), Search Algorithms and Loss
-Functions for Bayesian Clustering, <arXiv:2105.04451>.
+Functions for Bayesian Clustering, \url{arXiv:2105.04451}.
 }

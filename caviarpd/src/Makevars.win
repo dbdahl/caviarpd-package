@@ -1,8 +1,8 @@
 LIBDIR = rustlib/target/release
 LIBDIR_TEMPLATE = rustlib/target/___/release
-STATLIB = $(LIBDIR)/libcaviarpd.a
+STATLIB = $(LIBDIR)/librustlib.a
 
-PKG_LIBS = -L$(LIBDIR) -lcaviarpd -lws2_32 -ladvapi32 -luserenv -lbcrypt
+PKG_LIBS = -L$(LIBDIR) -lrustlib -lws2_32 -ladvapi32 -luserenv -lbcrypt
 
 all: clean
 

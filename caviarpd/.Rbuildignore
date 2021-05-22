@@ -1,4 +1,2 @@
-^.*\.Rproj$
+^caviarpd\.Rproj$
 ^\.Rproj\.user$
-src/rustlib/target
-src/rustlib/epa/target

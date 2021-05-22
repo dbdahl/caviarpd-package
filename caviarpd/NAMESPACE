@@ -3,6 +3,7 @@
 export(caviarPD)
 export(select.masses)
 export(single.mass)
+export(triple)
 importFrom(salso,VI)
 importFrom(salso,binder)
 importFrom(salso,psm)

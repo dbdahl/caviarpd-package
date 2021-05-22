@@ -22,7 +22,7 @@
 #' @importFrom stats dist uniroot var median
 #'
 select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0, temperature=10.0,
-                          loss='binder', maxNClusters=0, nSamplesSearch=500, nSamples=1000, w=c(1,1,0), nCores=0) {
+                          loss="binder", maxNClusters=0, nSamplesSearch=500, nSamples=1000, w=c(1,1,0), nCores=0) {
 
   ### ERROR CHECKING ###
   if (class(distance) != 'dist') stop(" 'distance' argument must be an object of class 'dist' ")
@@ -36,7 +36,7 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
   nsubsets.variance <- function(mass, n) sum((mass * (1:n - 1)) / (mass + 1:n - 1)^2)
   similarity <- exp( -temperature * as.matrix(distance) )
   nclust <- function(mass) {
-    caviarpd_n_clusters(nSamplesSearch, similarity, mass, discount, loss="binder", 16, maxNClusters, nCores, mkSeed())
+    .Call(.caviarpd_n_clusters, nSamplesSearch, similarity, mass, discount, loss=="VI", 16, maxNClusters, nCores, mkSeed())
   }
 
   bounds.by.ncl <- function(ncl.range, nSD=3) {
@@ -131,8 +131,8 @@ single.mass <- function(masses, distance, temperature=10.0, discount=0.0, nSampl
   total_var <- numeric(length(masses))
   ncl <- numeric(length(masses))
   similarity <- exp( -temperature * as.matrix(distance) )
-  for (i in 1:length(masses)) {
-    b <- sample_epa(nSamples, similarity, masses[i], discount, nCores, mkSeed())
+  for (i in seq_along(masses)) {
+    b <- .Call(.sample_epa, nSamples, similarity, masses[i], discount, nCores, mkSeed())
     x <- salso(b, loss=loss)
     psmat <- psm(b)
     ncl[i] <- length(unique(x))

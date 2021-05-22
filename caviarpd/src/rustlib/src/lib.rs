@@ -1,32 +1,34 @@
+#![allow(dead_code)]
+
+mod registration;
+use libR_sys::*;    // https://docs.rs/libR-sys
+
 use dahl_salso::clustering::Clusterings;
 use dahl_salso::optimize::{minimize_by_salso, SALSOParameters};
 use dahl_salso::{LabelType, LossFunction, PartitionDistributionInformation};
 use epa::epa::{sample, EpaParameters, SquareMatrixBorrower};
 use epa::perm::Permutation;
-use extendr_api::prelude::*;
 use rand_pcg::Pcg64Mcg;
 use std::convert::TryInto;
 use rand::Rng;
 
-fn seed_to_rng(seed: Robj) -> Pcg64Mcg {
-    let seed = seed.as_raw().unwrap().0;
-    Pcg64Mcg::new(u128::from_le_bytes(seed.try_into().unwrap()))
+fn seed_to_rng(seed: SEXP) -> Pcg64Mcg {
+    Pcg64Mcg::new(u128::from_le_bytes(sexp_as_slice_u8(seed).try_into().unwrap()))
 }
 
 fn sample_epa_engine<T: Rng>(
-    n_samples: i32,
-    similarity: &Robj,
+    n_samples: usize,
+    n_items: usize,
+    similarity: &[f64],
     mass: f64,
     discount: f64,
-    n_cores: i32,
+    n_cores: usize,
     rng: &mut T,
 ) -> (Vec<LabelType>, Vec<LabelType>) {
-    let n_samples = n_samples as usize;
-    let n_items = similarity.nrows();
     let n_cores = if n_cores == 0 {
         num_cpus::get()
     } else {
-        n_cores as usize
+        n_cores
     };
     let n_samples_per_core = 1 + (n_samples - 1) / n_cores;
     let chunk_size = n_samples_per_core * n_items;
@@ -45,7 +47,7 @@ fn sample_epa_engine<T: Rng>(
             stick2 = right2;
         }
         plan.push((stick1, stick2, rng.gen()));
-        let sim = SquareMatrixBorrower::from_slice(similarity.as_real_slice().unwrap(), n_items);
+        let sim = SquareMatrixBorrower::from_slice(similarity, n_items);
         plan.into_iter().for_each(|p| {
             s.spawn(move |_| {
                 let mut rng = Pcg64Mcg::new(p.2);
@@ -64,59 +66,61 @@ fn sample_epa_engine<T: Rng>(
     (samples, n_clusters)
 }
 
-#[extendr]
-fn sample_epa(
-    n_samples: i32,
-    similarity: Robj,
-    mass: f64,
-    discount: f64,
-    n_cores: i32,
-    seed: Robj
-) -> RMatrix<Vec<i32>> {
+unsafe fn sample_epa(
+    n_samples: SEXP,
+    similarity: SEXP,
+    mass: SEXP,
+    discount: SEXP,
+    n_cores: SEXP,
+    seed: SEXP
+) -> SEXP {
     let mut rng = seed_to_rng(seed);
-    let (samples, _) = sample_epa_engine(n_samples, &similarity, mass, discount, n_cores, &mut rng);
-    let n_samples = n_samples as usize;
-    let n_items = similarity.nrows();
-    let mut result = Vec::with_capacity(n_samples * n_items);
+    let n_samples = Rf_asInteger(n_samples) as usize;
+    let n_items = Rf_nrows(similarity) as usize;
+    let (samples, _) = sample_epa_engine(n_samples, n_items, sexp_as_slice_f64(similarity), Rf_asReal(mass), Rf_asReal(discount), Rf_asInteger(n_cores) as usize, &mut rng);
+    let n_samples = samples.len() / n_items;
+    let result = Rf_protect(Rf_allocMatrix(INTSXP, n_samples as i32, n_items as i32));
+    let result_slice = sexp_as_slice_i32_mut(result);
     for i in 0..n_items {
         for j in 0..n_samples {
-            result.push((samples[j * n_items + i] + 1) as i32);
+            result_slice[i * n_samples + j] = (samples[j * n_items + i] + 1) as i32;
         }
     }
-    RMatrix::new(result, n_samples, n_items)
+    Rf_unprotect(1);
+    result
 }
 
-#[extendr]
-fn caviarpd_n_clusters(
-    n_samples: i32,
-    similarity: Robj,
-    mass: f64,
-    discount: f64,
-    use_vi: bool,
-    n_runs: i32,
-    max_size: i32,
-    n_cores: i32,
-    seed: Robj
-) -> i32 {
+unsafe fn caviarpd_n_clusters(
+    n_samples: SEXP,
+    similarity: SEXP,
+    mass: SEXP,
+    discount: SEXP,
+    use_vi: SEXP,
+    n_runs: SEXP,
+    max_size: SEXP,
+    n_cores: SEXP,
+    seed: SEXP
+) -> SEXP {
     let mut rng = seed_to_rng(seed);
-    let (samples, n_clusters) = sample_epa_engine(n_samples, &similarity, mass, discount, n_cores, &mut rng);
-    let n_items = similarity.nrows();
+    let n_samples = Rf_asInteger(n_samples) as usize;
+    let n_items = Rf_nrows(similarity) as usize;
+    let (samples, n_clusters) = sample_epa_engine(n_samples, n_items, sexp_as_slice_f64(similarity), Rf_asReal(mass), Rf_asReal(discount), Rf_asInteger(n_cores) as usize, &mut rng);
     let n_samples = samples.len() / n_items;
     let clusterings = Clusterings::unvalidated(n_samples, n_items, samples, n_clusters);
     let pdi = PartitionDistributionInformation::Draws(&clusterings);
     let a = 1.0;
-    let loss_function = if use_vi {
+    let loss_function = if Rf_asLogical(use_vi) != 0 {
         LossFunction::VI(a)
     } else {
         LossFunction::BinderDraws(a)
     };
     let p = SALSOParameters {
         n_items,
-        max_size: max_size as LabelType,
+        max_size: Rf_asInteger(max_size) as LabelType,
         max_size_as_rf: false,
         max_scans: u32::MAX,
         max_zealous_updates: 10,
-        n_runs: n_runs as u32,
+        n_runs: Rf_asInteger(n_runs) as u32,
         prob_sequential_allocation: 0.5,
         prob_singletons_initialization: 0.0,
     };
@@ -125,17 +129,41 @@ fn caviarpd_n_clusters(
         loss_function,
         &p,
         f64::INFINITY,
-        n_cores as u32,
+        Rf_asInteger(n_cores) as u32,
         &mut rng,
     );
-    (fit.clustering.into_iter().max().unwrap() + 1) as i32
+    Rf_ScalarInteger((fit.clustering.into_iter().max().unwrap() + 1) as i32)
 }
 
-// Macro to generate exports.
-// This ensures exported functions are registered with R.
-// See corresponding C code in `entrypoint.c`.
-extendr_module! {
-    mod caviarpd;
-    fn sample_epa;
-    fn caviarpd_n_clusters;
+unsafe fn triple(a: SEXP) -> SEXP {
+    let b = Rf_protect(Rf_duplicate(a));
+    for x in sexp_as_slice_f64_mut(b) {
+        *x *= 3.0;
+    }
+    Rf_unprotect(1);
+    b
+}
+
+fn sexp_as_slice_f64_mut(a: SEXP) -> &'static mut [f64] {
+    unsafe { std::slice::from_raw_parts_mut(REAL(a), Rf_length(a) as usize) }
+}
+
+fn sexp_as_slice_f64(a: SEXP) -> &'static [f64] {
+    unsafe { std::slice::from_raw_parts(REAL(a), Rf_length(a) as usize) }
+}
+
+fn sexp_as_slice_i32_mut(a: SEXP) -> &'static mut [i32] {
+    unsafe { std::slice::from_raw_parts_mut(INTEGER(a), Rf_length(a) as usize) }
+}
+
+fn sexp_as_slice_i32(a: SEXP) -> &'static [i32] {
+    unsafe { std::slice::from_raw_parts(INTEGER(a), Rf_length(a) as usize) }
+}
+
+fn sexp_as_slice_u8_mut(a: SEXP) -> &'static mut [u8] {
+    unsafe { std::slice::from_raw_parts_mut(RAW(a), Rf_length(a) as usize) }
+}
+
+fn sexp_as_slice_u8(a: SEXP) -> &'static [u8] {
+    unsafe { std::slice::from_raw_parts(RAW(a), Rf_length(a) as usize) }
 }

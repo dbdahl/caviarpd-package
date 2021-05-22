@@ -1,4 +1,3 @@
-*.o
-*.so
-*.dll
-target
+/*.so
+/*.o
+/staticlib.tar.gz
