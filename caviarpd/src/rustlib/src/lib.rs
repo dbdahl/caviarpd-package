@@ -1,7 +1,8 @@
 #![allow(dead_code)]
 
 mod registration;
-use libR_sys::*; // https://docs.rs/libR-sys
+
+// Help: https://docs.rs/libR-sys, https://github.com/hadley/r-internals
 
 use dahl_salso::clustering::Clusterings;
 use dahl_salso::optimize::{minimize_by_salso, SALSOParameters};
@@ -10,11 +11,7 @@ use epa::epa::{sample, EpaParameters, SquareMatrixBorrower};
 use epa::perm::Permutation;
 use rand::Rng;
 use rand_pcg::Pcg64Mcg;
-use std::convert::TryInto;
-
-fn seed_to_rng(seed: SEXP) -> Pcg64Mcg {
-    Pcg64Mcg::new(u128::from_le_bytes(seed.as_raw_slice().try_into().unwrap()))
-}
+use roxido::*;
 
 fn sample_epa_engine<T: Rng>(
     n_samples: usize,
@@ -72,9 +69,8 @@ fn sample_epa(
     mass: SEXP,
     discount: SEXP,
     n_cores: SEXP,
-    seed: SEXP,
 ) -> SEXP {
-    let mut rng = seed_to_rng(seed);
+    let mut rng = SEXPMethods::rng_seeded_from_r();
     let n_samples = n_samples.as_integer() as usize;
     let n_items = similarity.nrow() as usize;
     let (samples, _) = sample_epa_engine(
@@ -107,9 +103,8 @@ unsafe fn caviarpd_n_clusters(
     n_runs: SEXP,
     max_size: SEXP,
     n_cores: SEXP,
-    seed: SEXP,
 ) -> SEXP {
-    let mut rng = seed_to_rng(seed);
+    let mut rng = SEXPMethods::rng_seeded_from_r();
     let n_samples = n_samples.as_integer() as usize;
     let n_items = similarity.nrow() as usize;
     let (samples, n_clusters) = sample_epa_engine(
@@ -149,109 +144,4 @@ unsafe fn caviarpd_n_clusters(
         &mut rng,
     );
     SEXPMethods::integer((fit.clustering.into_iter().max().unwrap() + 1) as i32)
-}
-
-struct SEXPMethods;
-
-impl SEXPMethods {
-    fn unprotect(i: i32) {
-        unsafe { Rf_unprotect(i) }
-    }
-    fn integer(x: i32) -> SEXP {
-        unsafe { Rf_ScalarInteger(x) }
-    }
-    fn double(x: f64) -> SEXP {
-        unsafe { Rf_ScalarReal(x) }
-    }
-    fn logical(x: bool) -> SEXP {
-        unsafe { Rf_ScalarLogical(x as i32) }
-    }
-    fn integer_vector(x: i32) -> SEXP {
-        unsafe { Rf_ScalarInteger(x) }
-    }
-    fn double_vector(x: f64) -> SEXP {
-        unsafe { Rf_ScalarReal(x) }
-    }
-    fn logical_vector(x: bool) -> SEXP {
-        unsafe { Rf_ScalarLogical(x as i32) }
-    }
-    fn integer_matrix(nrow: i32, ncol: i32) -> SEXP {
-        unsafe { Rf_allocMatrix(INTSXP, nrow, ncol) }
-    }
-    fn double_matrix(x: f64) -> SEXP {
-        unsafe { Rf_ScalarReal(x) }
-    }
-    fn logical_matrix(x: bool) -> SEXP {
-        unsafe { Rf_ScalarLogical(x as i32) }
-    }
-}
-
-trait SEXPExt {
-    fn protect(self) -> Self;
-    fn as_integer(self) -> i32;
-    fn as_double(self) -> f64;
-    fn as_logical(self) -> i32;
-    fn as_bool(self) -> bool;
-    fn as_integer_slice_mut(self) -> &'static mut [i32];
-    fn as_integer_slice(self) -> &'static [i32];
-    fn as_double_slice_mut(self) -> &'static mut [f64];
-    fn as_double_slice(self) -> &'static [f64];
-    fn as_logical_slice_mut(self) -> &'static mut [i32];
-    fn as_logical_slice(self) -> &'static [i32];
-    fn as_raw_slice_mut(self) -> &'static mut [u8];
-    fn as_raw_slice(self) -> &'static [u8];
-    fn length(self) -> i32;
-    fn nrow(self) -> i32;
-    fn ncol(self) -> i32;
-}
-
-impl SEXPExt for SEXP {
-    fn protect(self) -> Self {
-        unsafe { Rf_protect(self) }
-    }
-    fn as_integer(self) -> i32 {
-        unsafe { Rf_asInteger(self) }
-    }
-    fn as_double(self) -> f64 {
-        unsafe { Rf_asReal(self) }
-    }
-    fn as_logical(self) -> i32 {
-        unsafe { Rf_asLogical(self) }
-    }
-    fn as_bool(self) -> bool {
-        unsafe { Rf_asLogical(self) != 0 }
-    }
-    fn as_integer_slice_mut(self) -> &'static mut [i32] {
-        unsafe { std::slice::from_raw_parts_mut(INTEGER(self), Rf_length(self) as usize) }
-    }
-    fn as_integer_slice(self) -> &'static [i32] {
-        unsafe { std::slice::from_raw_parts(INTEGER(self), Rf_length(self) as usize) }
-    }
-    fn as_double_slice_mut(self) -> &'static mut [f64] {
-        unsafe { std::slice::from_raw_parts_mut(REAL(self), Rf_length(self) as usize) }
-    }
-    fn as_double_slice(self) -> &'static [f64] {
-        unsafe { std::slice::from_raw_parts(REAL(self), Rf_length(self) as usize) }
-    }
-    fn as_logical_slice_mut(self) -> &'static mut [i32] {
-        unsafe { std::slice::from_raw_parts_mut(LOGICAL(self), Rf_length(self) as usize) }
-    }
-    fn as_logical_slice(self) -> &'static [i32] {
-        unsafe { std::slice::from_raw_parts(LOGICAL(self), Rf_length(self) as usize) }
-    }
-    fn as_raw_slice_mut(self) -> &'static mut [u8] {
-        unsafe { std::slice::from_raw_parts_mut(RAW(self), Rf_length(self) as usize) }
-    }
-    fn as_raw_slice(self) -> &'static [u8] {
-        unsafe { std::slice::from_raw_parts(RAW(self), Rf_length(self) as usize) }
-    }
-    fn length(self) -> i32 {
-        unsafe { Rf_length(self) }
-    }
-    fn nrow(self) -> i32 {
-        unsafe { Rf_nrows(self) }
-    }
-    fn ncol(self) -> i32 {
-        unsafe { Rf_ncols(self) }
-    }
 }
