@@ -23,13 +23,13 @@
 #' @examples
 #' iris.dis <- dist(iris[,-5])
 #' # In practice the user should use at least 100 samples, but for ease of testing we use less here.
-#' caviarPD(distance=iris.dis, nSamples=10, nCores=1)
-#' caviarPD(distance=iris.dis, mass=0.75, loss="binder", nSamples=10, maxNClusters=3, nCores=1)
+#' caviarpd(distance=iris.dis, nSamples=10, nCores=1)
+#' caviarpd(distance=iris.dis, mass=0.75, loss="binder", nSamples=10, maxNClusters=3, nCores=1)
 #'
 #' @export
 #' @importFrom salso salso binder VI
 #'
-caviarPD <- function(distance, mass=1.0, loss="binder", nSamples=1000, samplesOnly=FALSE,
+caviarpd <- function(distance, mass=1.0, loss="binder", nSamples=1000, samplesOnly=FALSE,
                      distr="EPA", temperature=10.0, discount=0.0, maxNClusters=0, nCores=0) {
 
   ### ERROR CHECKING ###

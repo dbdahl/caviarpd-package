@@ -2,7 +2,7 @@
 #'
 #' User inputs a range of clustering sizes to obtain a mass value that can viably correspond to each cluster count.
 #'
-#' @inheritParams caviarPD
+#' @inheritParams caviarpd
 #' @param ncl.range A vector of two values representing the minimum and maximum number of clusters that the user wishes to consider in selecting mass values.
 #' @param single If TRUE, the algorithm returns both a list of masses for each targeted cluster count as well as a best overall mass selected from that list.
 #' @param nSD Number of standard deviations in the EPA distribution to consider for a range of mass values; lower values allow the algorithm to run more quickly, but also risk not finding the mass for some cluster counts.
