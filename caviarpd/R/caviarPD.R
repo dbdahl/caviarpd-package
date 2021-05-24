@@ -18,7 +18,7 @@
 #' @references
 #'
 #' D. B. Dahl, D. J. Johnson, and P. Müller (2021), Search Algorithms and Loss
-#' Functions for Bayesian Clustering, <arXiv:2105.04451>.
+#' Functions for Bayesian Clustering, [arXiv:2105.04451](https://arxiv.org/abs/2105.04451).
 #'
 #' @examples
 #' iris.dis <- dist(iris[,-5])

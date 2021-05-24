@@ -45,3 +45,7 @@ iris.masses <- select.masses(iris.dis, ncl.range=c(3,6), nSamplesSearch=10, nSam
 single.mass(masses=iris.masses, distance=iris.dis, nSamples=10, nCores=1)
 single.mass(masses=seq(.5, 2, by=.25), distance=iris.dis, nSamples=10, nCores=1)
 }
+\references{
+D. B. Dahl, D. J. Johnson, and P. Müller (2021), Search Algorithms and Loss
+Functions for Bayesian Clustering, \href{https://arxiv.org/abs/2105.04451}{arXiv:2105.04451}.
+}

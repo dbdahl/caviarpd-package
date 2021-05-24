@@ -53,5 +53,5 @@ caviarPD(distance=iris.dis, mass=0.75, loss="binder", nSamples=10, maxNClusters=
 }
 \references{
 D. B. Dahl, D. J. Johnson, and P. Müller (2021), Search Algorithms and Loss
-Functions for Bayesian Clustering, \url{arXiv:2105.04451}.
+Functions for Bayesian Clustering, \href{https://arxiv.org/abs/2105.04451}{arXiv:2105.04451}.
 }

@@ -15,7 +15,7 @@
 #' @references
 #'
 #' D. B. Dahl, D. J. Johnson, and P. Müller (2021), Search Algorithms and Loss
-#' Functions for Bayesian Clustering, <arXiv:2105.04451>.
+#' Functions for Bayesian Clustering, [arXiv:2105.04451](https://arxiv.org/abs/2105.04451).
 #'
 #' @example man/examples/select.masses.R
 #' @export
@@ -113,6 +113,11 @@ select.masses <- function(distance, ncl.range, single=FALSE, nSD=3, discount=0.0
 #' @param masses A vector of mass values from which to select the best mass. This can be a simple sequence for some range or a list of masses generated from the select.masses function.
 #'
 #' @return The value of the mass parameter that should be used in the CaviarPD method for the given pairwise distance matrix.
+#'
+#' @references
+#'
+#' D. B. Dahl, D. J. Johnson, and P. Müller (2021), Search Algorithms and Loss
+#' Functions for Bayesian Clustering, [arXiv:2105.04451](https://arxiv.org/abs/2105.04451).
 #'
 #' @example man/examples/single.mass.R
 #' @importFrom salso salso psm
