@@ -1,2 +1,3 @@
 ^caviarpd\.Rproj$
 ^\.Rproj\.user$
+^src/rustlib/target$
