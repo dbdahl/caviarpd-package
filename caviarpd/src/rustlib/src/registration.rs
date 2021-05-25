@@ -13,18 +13,18 @@
 mod registration;
 
 // Help: https://docs.rs/libR-sys, https://github.com/hadley/r-internals
-use roxido::*;
+use dahl_roxido::*;
 
 unsafe fn caviarpd_n_clusters(nSamplesSearch: SEXP, similarity: SEXP, mass: SEXP, discount: SEXP, unnamed1: SEXP, unnamed2: SEXP, maxNClusters: SEXP, nCores: SEXP) -> SEXP {
-    R_NilValue
+    libR_sys::R_NilValue
 }
 
 unsafe fn sample_epa(nSamples: SEXP, similarity: SEXP, unnamed1: SEXP, discount: SEXP, nCores: SEXP) -> SEXP {
-    R_NilValue
+    libR_sys::R_NilValue
 }
 */
 
-use roxido::libR_sys;
+use dahl_roxido::libR_sys;
 
 #[no_mangle]
 extern "C" fn R_init_caviarpd_librust(info: *mut libR_sys::DllInfo) {

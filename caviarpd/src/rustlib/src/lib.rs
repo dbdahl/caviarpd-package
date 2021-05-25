@@ -11,7 +11,7 @@ use epa::epa::{sample, EpaParameters, SquareMatrixBorrower};
 use epa::perm::Permutation;
 use rand::Rng;
 use rand_pcg::Pcg64Mcg;
-use roxido::*;
+use dahl_roxido::*;
 
 fn sample_epa_engine<T: Rng>(
     n_samples: usize,
