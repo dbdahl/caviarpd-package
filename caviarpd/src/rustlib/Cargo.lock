@@ -112,7 +112,7 @@ dependencies = [
 [[package]]
 name = "dahl-roxido"
 version = "0.4.0"
-source = "git+https://dahl-git.byu.edu/dahl/rust-dahl-roxido.git#04fa8cbb283211a251256afe658550281819ffa2"
+source = "git+https://dahl-git.byu.edu/dahl/rust-dahl-roxido.git#46d9263925602bcfba4a2250eddac8aebe8b04b8"
 dependencies = [
  "libR-sys",
  "rand_pcg",

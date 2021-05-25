@@ -11,6 +11,7 @@ use epa::epa::{sample, EpaParameters, SquareMatrixBorrower};
 use epa::perm::Permutation;
 use rand::Rng;
 use rand_pcg::Pcg64Mcg;
+use rand::SeedableRng;
 use dahl_roxido::*;
 
 fn sample_epa_engine<T: Rng>(
@@ -70,7 +71,7 @@ fn sample_epa(
     discount: SEXP,
     n_cores: SEXP,
 ) -> SEXP {
-    let mut rng = SEXPMethods::rng_seeded_from_r();
+    let mut rng = Pcg64Mcg::from_seed(SEXPMethods::random_bytes_from_r::<16>());
     let n_samples = n_samples.as_integer() as usize;
     let n_items = similarity.nrow() as usize;
     let (samples, _) = sample_epa_engine(
@@ -104,7 +105,7 @@ unsafe fn caviarpd_n_clusters(
     max_size: SEXP,
     n_cores: SEXP,
 ) -> SEXP {
-    let mut rng = SEXPMethods::rng_seeded_from_r();
+    let mut rng = Pcg64Mcg::from_seed(SEXPMethods::random_bytes_from_r::<16>());
     let n_samples = n_samples.as_integer() as usize;
     let n_items = similarity.nrow() as usize;
     let (samples, n_clusters) = sample_epa_engine(
