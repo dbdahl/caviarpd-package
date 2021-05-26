@@ -24,7 +24,7 @@ single.mass(
 
 \item{discount}{A number in \eqn{[0,1)} giving the discount parameter to control the distribution of subset sizes.}
 
-\item{nSamples}{Number of samples used to estimate the partition confidence and variance ratio for each mass value obtained from the search algorithm; only applicable if single=TRUE.}
+\item{nSamples}{The number of samples used to generate the clustering estimate.}
 
 \item{w}{Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance ratio, and the last is attached to the number of clusters. Setting the last weight to be nonzero gives priority to an estimate with fewer clusters.}
 

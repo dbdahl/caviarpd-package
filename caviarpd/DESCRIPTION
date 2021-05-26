@@ -12,6 +12,7 @@ Description: Cluster analysis is performed using pairwise distance information a
              clustering methods. 
 License: MIT + file LICENSE | Apache License 2.0
 Depends: R (>= 3.5.0), salso (>= 0.2.20)
+Imports: cluster (>= 2.1.2)
 LinkingTo: cargo (>= 0.1.30)
 SystemRequirements: Cargo (>= 1.51.0) for installation from sources: see file INSTALL
 Encoding: UTF-8

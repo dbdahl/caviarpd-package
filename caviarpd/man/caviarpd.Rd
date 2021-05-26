@@ -6,13 +6,16 @@
 \usage{
 caviarpd(
   distance,
-  mass = 1,
-  loss = "binder",
+  nClusters,
+  mass = NULL,
   nSamples = 1000,
+  gridLength = 10,
   samplesOnly = FALSE,
+  loss = "binder",
   distr = "EPA",
   temperature = 10,
   discount = 0,
+  sd = 3,
   maxNClusters = 0,
   nCores = 0
 )
@@ -20,13 +23,17 @@ caviarpd(
 \arguments{
 \item{distance}{A pairwise distance matrix of class 'dist'.}
 
-\item{mass}{The main tuning parameter for the number of clusters. A higher mass value tends to lead to more clusters.}
+\item{nClusters}{The clustering sizes to be considered in selecting the mass parameter. Should be left blank if a mass parameter is already specified.}
 
-\item{loss}{The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".}
+\item{mass}{The main tuning parameter for the number of clusters. A higher mass value tends to lead to more clusters. Should be left blank if cluster sizes are specified in the nClusters argument.}
 
-\item{nSamples}{Number of samples used to estimate the partition confidence and variance ratio for each mass value obtained from the search algorithm; only applicable if single=TRUE.}
+\item{nSamples}{The number of samples used to generate the clustering estimate.}
+
+\item{gridLength}{The length of the grid search for an optimal mass parameter. Only applicable if multiple values are passed into nClusters.}
 
 \item{samplesOnly}{If TRUE, the function only returns the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.}
+
+\item{loss}{The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".}
 
 \item{distr}{The random partition distribution used to generate samples.  This must be specified as either "EPA" or "ddCRP".}
 
@@ -34,12 +41,14 @@ caviarpd(
 
 \item{discount}{A number in \eqn{[0,1)} giving the discount parameter to control the distribution of subset sizes.}
 
+\item{sd}{Number of standard deviations away from the expectation to be considered in finding boundary mass values.}
+
 \item{maxNClusters}{The maximum number of clusters that can be considered by the SALSO method.}
 
 \item{nCores}{The number of CPU cores to use. A value of zero indicates to use all cores on the system.}
 }
 \value{
-A list containing two elements: the clustering estimate and the summary. The summary contains the pairwise probabilities for all samples and is used to create the confidence plots.
+A clustering estimate. The summary of the estimate contains the pairwise probabilities for all samples and is used to create the confidence plots.
 }
 \description{
 Returns a clustering estimate given pairwise distances. Users can also specify parameters for the mass, discount, temperature, loss function, or number of samples.
@@ -47,8 +56,8 @@ Returns a clustering estimate given pairwise distances. Users can also specify p
 \examples{
 iris.dis <- dist(iris[,-5])
 # In practice the user should use at least 100 samples, but for ease of testing we use less here.
-caviarpd(distance=iris.dis, nSamples=10, nCores=1)
-caviarpd(distance=iris.dis, mass=0.75, loss="binder", nSamples=10, maxNClusters=3, nCores=1)
+caviarpd(distance=iris.dis, nClusters=2:6, nSamples=10, nCores=1)
+caviarpd(distance=iris.dis, mass=1, nSamples=10, nCores=1)
 
 }
 \references{

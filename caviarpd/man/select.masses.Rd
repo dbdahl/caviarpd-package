@@ -38,7 +38,7 @@ select.masses(
 
 \item{nSamplesSearch}{Number of samples used for each iteration of the search algorithm to find the mass value corresponding to a desired number of clusters. Setting this argument too high can result in long computations.}
 
-\item{nSamples}{Number of samples used to estimate the partition confidence and variance ratio for each mass value obtained from the search algorithm; only applicable if single=TRUE.}
+\item{nSamples}{The number of samples used to generate the clustering estimate.}
 
 \item{w}{Weights for selecting a single mass. The first weight is attached to the partition confidence, the second weight is attached to the variance ratio, and the last is attached to the number of clusters. Setting the last weight to be nonzero gives priority to an estimate with fewer clusters.}
 
