@@ -13,6 +13,6 @@ crossbeam = "0.8.0"
 num_cpus = "1.13.0"
 dahl-salso = "0.5.6"
 epa = { path = "epa" }
-# dahl-roxido = { git="https://dahl-git.byu.edu/dahl/rust-dahl-roxido.git" }
-dahl-roxido = { path="/home/dahl/docs/devel/rust-dahl-roxido" }
+dahl-roxido = { git="https://dahl-git.byu.edu/dahl/rust-dahl-roxido.git", rev="46d92639" }
+# dahl-roxido = { path="/home/dahl/docs/devel/rust-dahl-roxido" }
 

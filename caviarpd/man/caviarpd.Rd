@@ -54,10 +54,13 @@ A object of class \code{salso.estimate}, which provides a clustering estimate th
 Returns a clustering estimate given pairwise distances using the CaviarPD method.
 }
 \examples{
-iris.dis <- dist(iris[,-5])
 # To reduce load on CRAN servers, limit the number of samples and CPU cores.
-est <- caviarpd(distance=iris.dis, mass=1, nSamples=200, nCores=2)
-est <- caviarpd(distance=iris.dis, nClusters=3:5, nSamples=200, nCores=2)
+set.seed(34)
+iris.dis <- dist(iris[,-5])
+est <- caviarpd(distance=iris.dis, mass=c(1, 2), nSamples=50, nCores=2)
+samples <- caviarpd(distance=iris.dis, mass=1, nSamples=50, samplesOnly=TRUE, nCores=2)
+est <- caviarpd(distance=iris.dis, nClusters=3, nSamples=100, nCores=2)
+est <- caviarpd(distance=iris.dis, nClusters=3:5, nSamples=100, nCores=2)
 summ <- summary(est, orderingMethod=2)
 plot(summ, type="heatmap")
 plot(summ, type="mds")

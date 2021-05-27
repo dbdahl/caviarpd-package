@@ -24,10 +24,13 @@
 #' Functions for Bayesian Clustering, [arXiv:2105.04451](https://arxiv.org/abs/2105.04451).
 #'
 #' @examples
-#' iris.dis <- dist(iris[,-5])
 #' # To reduce load on CRAN servers, limit the number of samples and CPU cores.
-#' est <- caviarpd(distance=iris.dis, mass=1, nSamples=200, nCores=2)
-#' est <- caviarpd(distance=iris.dis, nClusters=3:5, nSamples=200, nCores=2)
+#' set.seed(34)
+#' iris.dis <- dist(iris[,-5])
+#' est <- caviarpd(distance=iris.dis, mass=c(1, 2), nSamples=50, nCores=2)
+#' samples <- caviarpd(distance=iris.dis, mass=1, nSamples=50, samplesOnly=TRUE, nCores=2)
+#' est <- caviarpd(distance=iris.dis, nClusters=3, nSamples=100, nCores=2)
+#' est <- caviarpd(distance=iris.dis, nClusters=3:5, nSamples=100, nCores=2)
 #' summ <- summary(est, orderingMethod=2)
 #' plot(summ, type="heatmap")
 #' plot(summ, type="mds")
@@ -40,26 +43,29 @@
 caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, samplesOnly=FALSE,
                      loss="binder", distr="EPA", temperature=10.0, discount=0.0, sd=3, maxNClusters=0, nCores=0) {
 
-  ### ERROR CHECKING ###
-  if (class(distance) != 'dist') stop("'distance' argument must be an object of class 'dist'")
-  if (loss != "VI" && loss != 'binder') stop("'loss' argument must be specified as either 'binder' or 'VI'")
-  if (samplesOnly != TRUE && samplesOnly != FALSE) stop("'samplesOnly' argument is not interpretable as logical")
-  if (nSamples <= 0 || nSamples %% 1 !=0 || !is.numeric(nSamples)) stop("must specify a positive integer for the 'nsamples' argument")
-  if (temperature < 0) stop(" 'temperature' must be nonnegative ")
-  if (maxNClusters < 0 || maxNClusters %% 1 !=0 || !is.numeric(maxNClusters)) warning("'maxNClusters' argument should be a positive integer, ignoring constraint")
-  if (distr != "EPA" && distr != "ddCRP") stop("partition distribution must be specified as either 'EPA' or 'ddCRP' in the 'distr' argument")
+  if ( class(distance) != 'dist' ) stop("'distance' argument must be an object of class 'dist'")
+  if ( !missing(nClusters) && (!is.numeric(nClusters) || !all(is.finite(nClusters))) ) stop("'nClusters' must a numeric vector of finite values")
+  if ( !missing(mass) && (!is.numeric(mass) || !all(is.finite(mass))) ) stop("if supplied, 'mass' must be a numeric vector of finite values")
+  if ( !is.numeric(nSamples) || length(nSamples) != 1 || nSamples <= 0 || nSamples %% 1 != 0 ) stop("'nSamples' must be a strictly positive integer")
+  if ( !is.logical(samplesOnly) || !is.vector(samplesOnly) || ! samplesOnly %in% c(TRUE,FALSE) ) stop("'samplesOnly' must be a TRUE or FALSE")
+  if ( length(loss) != 1 || ! loss %in% c("VI","binder") ) stop("'loss' must be either 'binder' or 'VI'")
+  if ( distr != "EPA" && distr != "ddCRP" ) stop("'distr' must be either 'EPA' or 'ddCRP'")
+  if ( !is.numeric(temperature) || length(temperature) != 1 || temperature < 0 ) stop("'temperature' must be nonnegative")
   if ( !is.numeric(discount) || length(discount) != 1 || discount < 0 || discount >= 1.0 ) stop("'discount' must be in [0,1)")
-  if (samplesOnly == TRUE && (missing(mass) || length(mass) > 1)) stop( "must specify single mass parameter in order to obtain samples" )
+  if ( !is.numeric(sd) || length(sd) != 1 || sd <= 0 ) stop("'sd' must be nonnegative")
+  if ( !is.numeric(maxNClusters) || length(maxNClusters) != 1 || maxNClusters < 0 || maxNClusters %% 1 != 0 ) stop("'maxNClusters' must be 0 or a positive integer")
+  if ( !is.numeric(nCores) || length(nCores) != 1 || nCores < 0 || nCores %% 1 != 0 ) stop("'nCores' must be 0 or a positive integer")
+  if ( isTRUE(samplesOnly) && (missing(mass) || length(mass) > 1) ) stop( "must specify single mass parameter in order to obtain samples" )
   if ( length(nSamples) == 1 ) {
     nSamplesSearch <- 0.5 * nSamples
   } else if ( length(nSamples) == 2 ) {
     nSamplesSearch <- min(nSamples)
     nSamples <- max(nSamples)
   } else {
-    stop("no more than 2 sample sizes may be specified in the 'nsamples' argument")
+    stop("no more than 2 sample sizes may be specified in 'nSamples'")
   }
-
   similarity <- exp( -temperature * as.matrix(distance) )
+  if ( any(is.nan(similarity)) ) stop("similarity implied by 'distance' and 'temperature' has NaN values")
 
   single <- function(grid) {
     n <- length(grid)
@@ -116,42 +122,28 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
 
   # Mass selection
   if ( missing(mass) && !missing(nClusters) ) {
-
-    if ( !is.numeric(nClusters) ) stop("'nClusters' argument must be numeric")
     nClusters <- as.integer(nClusters)
-
     if ( length(nClusters) == 1 ) {
-
       best <- rootfinder(nClusters)
-
     } else {
-
       mass.lwr <- rootfinder(min(nClusters))
       mass.upr <- rootfinder(max(nClusters))
       if ( is.na(mass.lwr) ) mass.lwr <- 0.25
       if ( is.na(mass.upr) ) mass.upr <- 5
       massGrid <- seq(mass.lwr, mass.upr, length=gridLength)
       best <- single(massGrid)
-
     }
-
   } else if ( missing(nClusters) && !missing(mass) ) {
-
     if ( !is.numeric(mass) ||  ( mass <= -discount ) ) stop("'mass' must be numeric and greater than -'discount'")
     if ( length(mass) == 1 ) {
       best <- mass
     } else {
       best <- single(mass)
     }
-
   } else if (missing(mass) && missing(nClusters)) {
-
-    stop("must specify exactly one of 'mass' or 'nClusters' argument")
-
+    stop("must specify exactly one of 'mass' or 'nClusters'")
   } else {
-
-    stop("cannot specify both 'mass' and 'nClusters' arguments")
-
+    stop("cannot specify both 'mass' and 'nClusters'")
   }
 
   mass <- best
@@ -160,7 +152,7 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
   } else if (distr=="ddCRP") {
     samplePartition(DDCRPPartition(similarity=similarity, mass=mass), nSamples, randomizePermutation=TRUE)
   } else {
-    stop("partition distribution must be specified as either 'EPA' or 'ddCRP' in the 'distr' argument ")
+    stop("<impossible to get here because of previous check>")
   }
   if ( isTRUE(samplesOnly) ) return(samples)
   suppressWarnings(salso(samples, loss=loss, maxNClusters=maxNClusters))
