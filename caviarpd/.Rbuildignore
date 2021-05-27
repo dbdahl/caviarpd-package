@@ -3,4 +3,5 @@
 ^src/rustlib/target$
 ^src/rustlib/.+/target$
 ^src/rustlib/.idea$
+^src/rustlib/.+/.idea$
 ^src/staticlib.tar.gz$
