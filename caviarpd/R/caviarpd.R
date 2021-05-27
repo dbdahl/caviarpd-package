@@ -33,8 +33,9 @@
 #' plot(summ, type="mds")
 #'
 #' @export
-#' @importFrom salso salso
+#' @importFrom salso salso psm
 #' @importFrom cluster silhouette
+#' @importFrom stats uniroot
 #'
 caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, samplesOnly=FALSE,
                      loss="binder", distr="EPA", temperature=10.0, discount=0.0, sd=3, maxNClusters=0, nCores=0) {
@@ -85,9 +86,8 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
   }
 
   rootfinder <- function(ncl) {
-    if ( ncl == 1 ) return(.Machine$double.eps)
-    D <- length(distance)
-    n <- .5 * (1+sqrt(8*D+1))
+    if ( ncl == 1 ) return(-discount + .Machine$double.eps)
+    n <- nrow(similarity)
     nsubsets.average <- function(mass, n) sum(mass / (mass + 1:n - 1))
     nsubsets.variance <- function(mass, n) sum((mass * (1:n - 1)) / (mass + 1:n - 1)^2)
     nclust <- function(mass) {
@@ -118,7 +118,7 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
   if ( missing(mass) && !missing(nClusters) ) {
 
     if ( !is.numeric(nClusters) ) stop("'nClusters' argument must be numeric")
-    nClusters <- floor(nClusters)
+    nClusters <- as.integer(nClusters)
 
     if ( length(nClusters) == 1 ) {
 
@@ -128,11 +128,9 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
 
       mass.lwr <- rootfinder(min(nClusters))
       mass.upr <- rootfinder(max(nClusters))
-      if ( is.na(mass.lwr) || is.na(mass.upr) ) {
-        massGrid <- seq(0.5, 4, by=0.25)
-      } else {
-        massGrid <- seq(mass.lwr, mass.upr, length=gridLength)
-      }
+      if ( is.na(mass.lwr) ) mass.lwr <- 0.25
+      if ( is.na(mass.upr) ) mass.upr <- 5
+      massGrid <- seq(mass.lwr, mass.upr, length=gridLength)
       best <- single(massGrid)
 
     }

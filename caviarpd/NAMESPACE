@@ -2,5 +2,7 @@
 
 export(caviarpd)
 importFrom(cluster,silhouette)
+importFrom(salso,psm)
 importFrom(salso,salso)
+importFrom(stats,uniroot)
 useDynLib(caviarpd, .registration = TRUE)
