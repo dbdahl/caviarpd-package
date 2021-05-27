@@ -55,7 +55,7 @@ extern "C" fn R_init_caviarpd_librust(info: *mut libR_sys::DllInfo) {
             std::ptr::null(),
             std::ptr::null(),
         );
-        libR_sys::R_useDynamicSymbols(info, 0);
+        libR_sys::R_useDynamicSymbols(info, 1);
+        libR_sys::R_forceSymbols(info, 1);
     }
 }
-

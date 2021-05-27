@@ -7,7 +7,7 @@
 caviarpd(
   distance,
   nClusters,
-  mass = NULL,
+  mass,
   nSamples = 1000,
   gridLength = 10,
   samplesOnly = FALSE,
@@ -23,9 +23,9 @@ caviarpd(
 \arguments{
 \item{distance}{A pairwise distance matrix of class 'dist'.}
 
-\item{nClusters}{The clustering sizes to be considered in selecting the mass parameter. Should be left blank if a mass parameter is already specified.}
+\item{nClusters}{The clustering sizes to be considered in selecting the mass parameter. Should be unset if the \code{mass} argument is used.}
 
-\item{mass}{The main tuning parameter for the number of clusters. A higher mass value tends to lead to more clusters. Should be left blank if cluster sizes are specified in the nClusters argument.}
+\item{mass}{The main tuning parameter for the number of clusters. A higher mass value tends to lead to more clusters. Should be unset if the \code{nClusters} argument is provided.}
 
 \item{nSamples}{The number of samples used to generate the clustering estimate.}
 

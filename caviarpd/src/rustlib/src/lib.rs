@@ -4,15 +4,15 @@ mod registration;
 
 // Help: https://docs.rs/libR-sys, https://github.com/hadley/r-internals
 
+use dahl_roxido::*;
 use dahl_salso::clustering::Clusterings;
 use dahl_salso::optimize::{minimize_by_salso, SALSOParameters};
 use dahl_salso::{LabelType, LossFunction, PartitionDistributionInformation};
 use epa::epa::{sample, EpaParameters, SquareMatrixBorrower};
 use epa::perm::Permutation;
+use rand::SeedableRng;
 use rand::Rng;
 use rand_pcg::Pcg64Mcg;
-use rand::SeedableRng;
-use dahl_roxido::*;
 
 fn sample_epa_engine<T: Rng>(
     n_samples: usize,
@@ -64,7 +64,8 @@ fn sample_epa_engine<T: Rng>(
     (samples, n_clusters)
 }
 
-fn sample_epa(
+#[no_mangle]
+pub extern "C" fn sample_epa(
     n_samples: SEXP,
     similarity: SEXP,
     mass: SEXP,
@@ -95,7 +96,9 @@ fn sample_epa(
     result
 }
 
-unsafe fn caviarpd_n_clusters(
+
+#[no_mangle]
+pub extern "C" fn caviarpd_n_clusters(
     n_samples: SEXP,
     similarity: SEXP,
     mass: SEXP,
