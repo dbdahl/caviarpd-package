@@ -23,13 +23,13 @@ caviarpd(
 \arguments{
 \item{distance}{A pairwise distance matrix of class 'dist'.}
 
-\item{nClusters}{The clustering sizes to be considered in selecting the mass parameter. Should be unset if the \code{mass} argument is used.}
+\item{nClusters}{A numeric vector giving the range for the number of clusters to consider when search for the mass parameter. Should be unset if the \code{mass} argument is used.}
 
-\item{mass}{The main tuning parameter for the number of clusters. A higher mass value tends to lead to more clusters. Should be unset if the \code{nClusters} argument is provided.}
+\item{mass}{The main tuning parameter governing the number of clusters, with higher values tends toward more clusters. Should be unset if the \code{nClusters} argument is provided.}
 
 \item{nSamples}{The number of samples used to generate the clustering estimate.}
 
-\item{gridLength}{The length of the grid search for an optimal mass parameter. Only applicable if multiple values are passed into nClusters.}
+\item{gridLength}{The length of the grid search for an optimal mass parameter. Only applicable if multiple values are provided for \code{nClusters}.}
 
 \item{samplesOnly}{If TRUE, the function only returns the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.}
 

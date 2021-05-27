@@ -3,10 +3,10 @@
 #' Returns a clustering estimate given pairwise distances. Users can also specify parameters for the mass, discount, temperature, loss function, or number of samples.
 #'
 #' @param distance A pairwise distance matrix of class 'dist'.
-#' @param nClusters The clustering sizes to be considered in selecting the mass parameter. Should be unset if the \code{mass} argument is used.
-#' @param mass The main tuning parameter for the number of clusters. A higher mass value tends to lead to more clusters. Should be unset if the \code{nClusters} argument is provided.
+#' @param nClusters A numeric vector giving the range for the number of clusters to consider when search for the mass parameter. Should be unset if the \code{mass} argument is used.
+#' @param mass The main tuning parameter governing the number of clusters, with higher values tends toward more clusters. Should be unset if the \code{nClusters} argument is provided.
 #' @param nSamples The number of samples used to generate the clustering estimate.
-#' @param gridLength The length of the grid search for an optimal mass parameter. Only applicable if multiple values are passed into nClusters.
+#' @param gridLength The length of the grid search for an optimal mass parameter. Only applicable if multiple values are provided for \code{nClusters}.
 #' @param samplesOnly If TRUE, the function only returns the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.
 #' @param loss The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".
 #' @param distr The random partition distribution used to generate samples.  This must be specified as either "EPA" or "ddCRP".
@@ -40,13 +40,14 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
   if (class(distance) != 'dist') stop("'distance' argument must be an object of class 'dist'")
   if (loss != "VI" && loss != 'binder') stop("'loss' argument must be specified as either 'binder' or 'VI'")
   if (samplesOnly != TRUE && samplesOnly != FALSE) stop("'samplesOnly' argument is not interpretable as logical")
-  if (nSamples <= 0 || nSamples %% 1 !=0 || !is.numeric(nSamples)) stop ("must specify a positive integer for the 'nsamples' argument")
+  if (nSamples <= 0 || nSamples %% 1 !=0 || !is.numeric(nSamples)) stop("must specify a positive integer for the 'nsamples' argument")
   if (temperature < 0) stop(" 'temperature' must be nonnegative ")
-  if (maxNClusters < 0 || maxNClusters %% 1 !=0 || !is.numeric(maxNClusters)) warning ("'maxNClusters' argument should be a positive integer, ignoring constraint")
+  if (maxNClusters < 0 || maxNClusters %% 1 !=0 || !is.numeric(maxNClusters)) warning("'maxNClusters' argument should be a positive integer, ignoring constraint")
   if (distr != "EPA" && distr != "ddCRP") stop("partition distribution must be specified as either 'EPA' or 'ddCRP' in the 'distr' argument")
+  if ( !is.numeric(discount) || length(discount) != 1 || discount < 0 || discount >= 1.0 ) stop("'discount' must be in [0,1)")
   if (samplesOnly == TRUE && (missing(mass) || length(mass) > 1)) stop( "must specify single mass parameter in order to obtain samples" )
   if ( length(nSamples) == 1 ) {
-    nsamplesSearch <- 0.5 * nSamples
+    nSamplesSearch <- 0.5 * nSamples
   } else if ( length(nSamples) == 2 ) {
     nSamplesSearch <- min(nSamples)
     nSamples <- max(nSamples)
@@ -59,21 +60,21 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
   single <- function(grid) {
     n <- length(grid)
     sils <-  numeric(n)
-    for (i in 1:n) {
+    for ( i in 1:n ) {
       samples <- if ( distr=="EPA" ) {
         .Call(.sample_epa, nSamples, similarity, grid[i], discount, nCores)
       } else {
         samplePartition(DDCRPPartition(similarity=similarity, mass=grid[i]), nSamples, randomizePermutation=TRUE)
       }
       est <- suppressWarnings(salso(samples, loss=loss, maxNClusters=maxNClusters))
-      if (length(unique(est)) == 1) {
+      if ( length(unique(est)) == 1 ) {
         sils[i] <- NA
       } else {
         s <- summary(silhouette(est, 1-psm(samples)))
         sils[i] <- s$avg.width
       }
     }
-    if (all(is.na(sils))) {
+    if ( all(is.na(sils)) ) {
       return(grid[n])
     } else {
       return(grid[which.max(sils)])
@@ -81,6 +82,7 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
   }
 
   rootfinder <- function(ncl) {
+    if ( ncl == 1 ) return(.Machine$double.eps)
     D <- length(distance)
     n <- .5 * (1+sqrt(8*D+1))
     nsubsets.average <- function(mass, n) sum(mass / (mass + 1:n - 1))
@@ -100,27 +102,22 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
         sd*sqrt(nsubsets.variance(m, n)) - nClusters }}
 
     # Get mass bounds and variance
-    LB <- uniroot(lwr(ncl), c(.001, 100))$root
-    UB <- uniroot(upr(ncl), c(.001, 100))$root
-    func <- function(ncl) { function(mass) { nclust(mass) - ncl } }
+    LB <- uniroot(lwr(ncl), c(.0001, 1000))$root
+    UB <- uniroot(upr(ncl), c(.0001, 1000))$root
     bounds <- c(LB, UB)
+    func <- function(mass) { nclust(mass) - ncl }
 
     # Find best mass
-    root.mass <- tryCatch( uniroot(func(ncl), bounds)$root, error=function(e) NA)
-    root.mass
+    tryCatch(uniroot(func, bounds)$root, error=function(e) NA)
   }
 
   # Mass selection
-  if (missing(mass) & !missing(nClusters)) {
+  if ( missing(mass) && !missing(nClusters) ) {
 
-    if ( !is.numeric(nClusters) ) stop ("'nClusters' argument must be numeric")
+    if ( !is.numeric(nClusters) ) stop("'nClusters' argument must be numeric")
     nClusters <- floor(nClusters)
 
-    if (length(nClusters) > 100) {
-
-      stop("too many values of 'nClusters'")
-
-    } else if (length(nClusters) == 1) {
+    if ( length(nClusters) == 1 ) {
 
       best <- rootfinder(nClusters)
 
@@ -128,7 +125,7 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
 
       mass.lwr <- rootfinder(min(nClusters))
       mass.upr <- rootfinder(max(nClusters))
-      if (is.na(mass.lwr) | is.na(mass.upr)) {
+      if ( is.na(mass.lwr) || is.na(mass.upr) ) {
         massGrid <- seq(0.5, 4, by=0.25)
       } else {
         massGrid <- seq(mass.lwr, mass.upr, length=gridLength)
@@ -137,22 +134,22 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
 
     }
 
-  } else if (missing(nClusters) & !missing(mass)) {
+  } else if ( missing(nClusters) && !missing(mass) ) {
 
-    if( !is.numeric(mass) ) stop("'mass' must be numeric and greater than -'discount'")
-    if (length(mass) == 1) {
+    if ( !is.numeric(mass) ||  ( mass <= -discount ) ) stop("'mass' must be numeric and greater than -'discount'")
+    if ( length(mass) == 1 ) {
       best <- mass
     } else {
       best <- single(mass)
     }
 
-  } else if (missing(mass) & missing(nClusters)) {
+  } else if (missing(mass) && missing(nClusters)) {
 
-    stop("must specify either mass or nClusters argument")
+    stop("must specify exactly one of 'mass' or 'nClusters' argument")
 
   } else {
 
-    stop ("cannot specify arguments for both mass and nClusters")
+    stop("cannot specify both 'mass' and 'nClusters' arguments")
 
   }
 
@@ -164,6 +161,6 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
   } else {
     stop("partition distribution must be specified as either 'EPA' or 'ddCRP' in the 'distr' argument ")
   }
-  if(samplesOnly == TRUE) return(samples)
-  suppressWarnings(salso(samples, loss=loss, maxNClusters = maxNClusters))
+  if ( isTRUE(samplesOnly) ) return(samples)
+  suppressWarnings(salso(samples, loss=loss, maxNClusters=maxNClusters))
 }
