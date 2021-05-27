@@ -1,6 +1,6 @@
 #' Cluster Analysis via Random Partition Distributions
 #'
-#' Returns a clustering estimate given pairwise distances. Users can also specify parameters for the mass, discount, temperature, loss function, or number of samples.
+#' Returns a clustering estimate given pairwise distances using the CaviarPD method.
 #'
 #' @param distance A pairwise distance matrix of class 'dist'.
 #' @param nClusters A numeric vector giving the range for the number of clusters to consider when search for the mass parameter. Should be unset if the \code{mass} argument is used.
@@ -16,7 +16,7 @@
 #' @param maxNClusters The maximum number of clusters that can be considered by the SALSO method.
 #' @param nCores The number of CPU cores to use. A value of zero indicates to use all cores on the system.
 #'
-#' @return A clustering estimate. The summary of the estimate contains the pairwise probabilities for all samples and is used to create the confidence plots.
+#' @return A object of class \code{salso.estimate}, which provides a clustering estimate that can be displayed and plotted.
 #'
 #' @references
 #'
@@ -25,9 +25,12 @@
 #'
 #' @examples
 #' iris.dis <- dist(iris[,-5])
-#' # In practice the user should use at least 100 samples, but for ease of testing we use less here.
-#' caviarpd(distance=iris.dis, nClusters=2:6, nSamples=10, nCores=1)
-#' caviarpd(distance=iris.dis, mass=1, nSamples=10, nCores=1)
+#' # To reduce load on CRAN servers, limit the number of samples and CPU cores.
+#' est <- caviarpd(distance=iris.dis, mass=1, nSamples=200, nCores=2)
+#' est <- caviarpd(distance=iris.dis, nClusters=3:5, nSamples=200, nCores=2)
+#' summ <- summary(est, orderingMethod=2)
+#' plot(summ, type="heatmap")
+#' plot(summ, type="mds")
 #'
 #' @export
 #' @importFrom salso salso
