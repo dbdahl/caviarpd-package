@@ -60,7 +60,7 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
     n <- length(grid)
     sils <-  numeric(n)
     for (i in 1:n) {
-      samples <- if (distr=="EPA") {
+      samples <- if ( distr=="EPA" ) {
         .Call(.sample_epa, nSamples, similarity, grid[i], discount, nCores)
       } else {
         samplePartition(DDCRPPartition(similarity=similarity, mass=grid[i]), nSamples, randomizePermutation=TRUE)
