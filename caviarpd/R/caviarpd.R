@@ -45,13 +45,13 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
 
   if ( class(distance) != 'dist' ) stop("'distance' argument must be an object of class 'dist'")
   if ( !missing(nClusters) && (!is.numeric(nClusters) || !all(is.finite(nClusters))) ) stop("'nClusters' must a numeric vector of finite values")
-  if ( !missing(mass) && (!is.numeric(mass) || !all(is.finite(mass))) ) stop("if supplied, 'mass' must be a numeric vector of finite values")
+  if ( !is.numeric(discount) || length(discount) != 1 || discount < 0 || discount >= 1.0 ) stop("'discount' must be in [0,1)")
+  if ( !missing(mass) && (!is.numeric(mass) || !all(is.finite(mass)) || any( mass <= -discount )) ) stop("if supplied, 'mass' must be a numeric vector of finite values")
   if ( !is.numeric(nSamples) || length(nSamples) != 1 || nSamples <= 0 || nSamples %% 1 != 0 ) stop("'nSamples' must be a strictly positive integer")
   if ( !is.logical(samplesOnly) || !is.vector(samplesOnly) || ! samplesOnly %in% c(TRUE,FALSE) ) stop("'samplesOnly' must be a TRUE or FALSE")
   if ( length(loss) != 1 || ! loss %in% c("VI","binder") ) stop("'loss' must be either 'binder' or 'VI'")
   if ( distr != "EPA" && distr != "ddCRP" ) stop("'distr' must be either 'EPA' or 'ddCRP'")
   if ( !is.numeric(temperature) || length(temperature) != 1 || temperature < 0 ) stop("'temperature' must be nonnegative")
-  if ( !is.numeric(discount) || length(discount) != 1 || discount < 0 || discount >= 1.0 ) stop("'discount' must be in [0,1)")
   if ( !is.numeric(sd) || length(sd) != 1 || sd <= 0 ) stop("'sd' must be nonnegative")
   if ( !is.numeric(maxNClusters) || length(maxNClusters) != 1 || maxNClusters < 0 || maxNClusters %% 1 != 0 ) stop("'maxNClusters' must be 0 or a positive integer")
   if ( !is.numeric(nCores) || length(nCores) != 1 || nCores < 0 || nCores %% 1 != 0 ) stop("'nCores' must be 0 or a positive integer")
@@ -134,7 +134,6 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
       best <- single(massGrid)
     }
   } else if ( missing(nClusters) && !missing(mass) ) {
-    if ( !is.numeric(mass) ||  ( mass <= -discount ) ) stop("'mass' must be numeric and greater than -'discount'")
     if ( length(mass) == 1 ) {
       best <- mass
     } else {
