@@ -13,6 +13,7 @@ use epa::perm::Permutation;
 use rand::SeedableRng;
 use rand::Rng;
 use rand_pcg::Pcg64Mcg;
+use std::convert::TryFrom;
 
 fn sample_epa_engine<T: Rng>(
     n_samples: usize,
@@ -28,6 +29,7 @@ fn sample_epa_engine<T: Rng>(
     } else {
         n_cores
     };
+    let n_samples = n_samples.max(1);
     let n_samples_per_core = 1 + (n_samples - 1) / n_cores;
     let chunk_size = n_samples_per_core * n_items;
     let mut samples: Vec<LabelType> = vec![0; n_cores * chunk_size];
@@ -56,7 +58,7 @@ fn sample_epa_engine<T: Rng>(
                     let clustering = sample(&params, &mut rng);
                     let zero: LabelType = 0;
                     clustering.relabel_into_slice(zero, &mut p.0[i * n_items..(i + 1) * n_items]);
-                    p.1[i] = (clustering.max_label() + 1) as LabelType;
+                    p.1[i] = LabelType::try_from(clustering.max_label() + 1).unwrap();
                 }
             });
         });
@@ -73,23 +75,23 @@ pub extern "C" fn sample_epa(
     n_cores: SEXP,
 ) -> SEXP {
     let mut rng = Pcg64Mcg::from_seed(SEXPMethods::random_bytes_from_r::<16>());
-    let n_samples = n_samples.as_integer() as usize;
-    let n_items = similarity.nrow() as usize;
+    let n_samples = n_samples.as_usize();
+    let n_items = similarity.nrow_usize();
     let (samples, _) = sample_epa_engine(
         n_samples,
         n_items,
         similarity.as_double_slice(),
         mass.as_double(),
         discount.as_double(),
-        n_cores.as_integer() as usize,
+        usize::try_from(n_cores.as_integer()).unwrap(),
         &mut rng,
     );
     let n_samples = samples.len() / n_items;
-    let result = SEXPMethods::integer_matrix(n_samples as i32, n_items as i32).protect();
+    let result = SEXPMethods::integer_matrix(i32::try_from(n_samples).unwrap(), i32::try_from(n_items).unwrap()).protect();
     let result_slice = result.as_integer_slice_mut();
     for i in 0..n_items {
         for j in 0..n_samples {
-            result_slice[i * n_samples + j] = (samples[j * n_items + i] + 1) as i32;
+            result_slice[i * n_samples + j] = i32::from(samples[j * n_items + i] + 1);
         }
     }
     SEXPMethods::unprotect(1);
@@ -109,15 +111,15 @@ pub extern "C" fn caviarpd_n_clusters(
     n_cores: SEXP,
 ) -> SEXP {
     let mut rng = Pcg64Mcg::from_seed(SEXPMethods::random_bytes_from_r::<16>());
-    let n_samples = n_samples.as_integer() as usize;
-    let n_items = similarity.nrow() as usize;
+    let n_samples = n_samples.as_usize();
+    let n_items = similarity.nrow_usize();
     let (samples, n_clusters) = sample_epa_engine(
         n_samples,
         n_items,
         similarity.as_double_slice(),
         mass.as_double(),
         discount.as_double(),
-        n_cores.as_integer() as usize,
+        n_cores.as_usize(),
         &mut rng,
     );
     let n_samples = samples.len() / n_items;
@@ -131,11 +133,11 @@ pub extern "C" fn caviarpd_n_clusters(
     };
     let p = SALSOParameters {
         n_items,
-        max_size: max_size.as_integer() as LabelType,
+        max_size: LabelType::try_from(max_size.as_integer()).unwrap(),
         max_size_as_rf: false,
         max_scans: u32::MAX,
         max_zealous_updates: 10,
-        n_runs: n_runs.as_integer() as u32,
+        n_runs: u32::try_from(n_runs.as_integer()).unwrap(),
         prob_sequential_allocation: 0.5,
         prob_singletons_initialization: 0.0,
     };
@@ -144,7 +146,7 @@ pub extern "C" fn caviarpd_n_clusters(
         loss_function,
         &p,
         f64::INFINITY,
-        n_cores.as_integer() as u32,
+        u32::try_from(n_cores.as_integer()).unwrap(),
         &mut rng,
     );
     SEXPMethods::integer((fit.clustering.into_iter().max().unwrap() + 1) as i32)
