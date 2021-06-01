@@ -3,7 +3,7 @@
 #' Returns a clustering estimate given pairwise distances using the CaviarPD method.
 #'
 #' @param distance A pairwise distance matrix of class 'dist'.
-#' @param nClusters A numeric vector that specificies the range for the number of clusters to consider in the search for a clustering estimate. Should be missing if the \code{mass} argument is used. See `Details`.
+#' @param nClusters A numeric vector that specifies the range for the number of clusters to consider in the search for a clustering estimate. Should be missing if the \code{mass} argument is used. See `Details`.
 #' @param mass A numeric vector of mass values to consider in the search for a clustering estimate. Should be missing if the \code{nClusters} argument is used. See `Details`.
 #' @param nSamples The number of samples used to generate the clustering estimate.
 #' @param gridLength The length of the grid search for an optimal mass parameter. Only applicable if a range of values are provided for \code{nClusters}.
