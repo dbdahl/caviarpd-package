@@ -3,10 +3,10 @@
 #' Returns a clustering estimate given pairwise distances using the CaviarPD method.
 #'
 #' @param distance A pairwise distance matrix of class 'dist'.
-#' @param nClusters A numeric vector giving the range for the number of clusters to consider when search for the mass parameter. Should be unset if the \code{mass} argument is used.
-#' @param mass The main tuning parameter governing the number of clusters, with higher values tends toward more clusters. Should be unset if the \code{nClusters} argument is provided.
+#' @param nClusters A numeric vector that specificies the range for the number of clusters to consider in the search for a clustering estimate. Should be missing if the \code{mass} argument is used. See `Details`.
+#' @param mass A numeric vector of mass values to consider in the search for a clustering estimate. Should be missing if the \code{nClusters} argument is used. See `Details`.
 #' @param nSamples The number of samples used to generate the clustering estimate.
-#' @param gridLength The length of the grid search for an optimal mass parameter. Only applicable if multiple values are provided for \code{nClusters}.
+#' @param gridLength The length of the grid search for an optimal mass parameter. Only applicable if a range of values are provided for \code{nClusters}.
 #' @param samplesOnly If TRUE, the function only returns the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.
 #' @param loss The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".
 #' @param distr The random partition distribution used to generate samples.  This must be specified as either "EPA" or "ddCRP".
@@ -16,7 +16,20 @@
 #' @param maxNClusters The maximum number of clusters that can be considered by the SALSO method.
 #' @param nCores The number of CPU cores to use. A value of zero indicates to use all cores on the system.
 #'
-#' @return A object of class \code{salso.estimate}, which provides a clustering estimate that can be displayed and plotted.
+#' @details 
+#' The \code{mass} argument is the main tuning parameter governing the number of clusters, 
+#'  with higher values tending toward more clusters. The \code{mass} is a real number bounded
+#'  below by \eqn{-}\code{discount}. When a vector of mass values is supplied, a clustering
+#'  estimate for each mass value is generated and the best clustering estimate is returned. 
+#'  
+#' Alternatively, a range for the number of clusters to be considered can be supplied with the
+#'  \code{nClusters} argument. Mass values that return a clustering estimate with the minimum and
+#'  maximum value of the range will estimated. A grid of mass values (of length \code{gridLength}) between
+#'  the estimated min and max cluster mass values will be considered in the search for a clustering 
+#'  estimate. If \code{nClusters} is a single integer, then a clustering estimate with \code{nClusters}
+#'  clusters will be returned.
+#' 
+#' @return A object of class \code{salso.estimate}, which provides a clustering estimate (a vector of cluster labels) that can be displayed and plotted.
 #'
 #' @references
 #'
