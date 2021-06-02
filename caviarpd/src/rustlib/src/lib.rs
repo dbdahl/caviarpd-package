@@ -4,10 +4,10 @@ mod registration;
 
 // Help: https://docs.rs/libR-sys, https://github.com/hadley/r-internals
 
-use dahl_roxido::*;
 use dahl_salso::clustering::Clusterings;
 use dahl_salso::optimize::{minimize_by_salso, SALSOParameters};
 use dahl_salso::{LabelType, LossFunction, PartitionDistributionInformation};
+use roxido::*;
 use epa::epa::{sample, EpaParameters, SquareMatrixBorrower};
 use epa::perm::Permutation;
 use rand::SeedableRng;

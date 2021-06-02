@@ -26,7 +26,7 @@ extern "C" fn caviarpd_n_clusters(nSamplesSearch: SEXP, similarity: SEXP, mass: 
 }
 */
 
-use dahl_roxido::libR_sys;
+use roxido::libR_sys;
 
 #[no_mangle]
 extern "C" fn R_init_caviarpd_librust(info: *mut libR_sys::DllInfo) {
