@@ -16,19 +16,19 @@
 #' @param maxNClusters The maximum number of clusters that can be considered by the SALSO method.
 #' @param nCores The number of CPU cores to use. A value of zero indicates to use all cores on the system.
 #'
-#' @details 
-#' The \code{mass} argument is the main tuning parameter governing the number of clusters, 
+#' @details
+#' The \code{mass} argument is the main tuning parameter governing the number of clusters,
 #'  with higher values tending toward more clusters. The \code{mass} is a real number bounded
 #'  below by \eqn{-}\code{discount}. When a vector of mass values is supplied, a clustering
-#'  estimate for each mass value is generated and the best clustering estimate is returned. 
-#'  
+#'  estimate for each mass value is generated and the best clustering estimate is returned.
+#'
 #' Alternatively, a range for the number of clusters to be considered can be supplied with the
 #'  \code{nClusters} argument. Mass values that return a clustering estimate with the minimum and
 #'  maximum value of the range will estimated. A grid of mass values (of length \code{gridLength}) between
-#'  the estimated min and max cluster mass values will be considered in the search for a clustering 
+#'  the estimated min and max cluster mass values will be considered in the search for a clustering
 #'  estimate. If \code{nClusters} is a single integer, then a clustering estimate with \code{nClusters}
 #'  clusters will be returned.
-#' 
+#'
 #' @return A object of class \code{salso.estimate}, which provides a clustering estimate (a vector of cluster labels) that can be displayed and plotted.
 #'
 #' @references
@@ -37,13 +37,13 @@
 #' Functions for Bayesian Clustering, [arXiv:2105.04451](https://arxiv.org/abs/2105.04451).
 #'
 #' @examples
-#' # To reduce load on CRAN servers, limit the number of samples and CPU cores.
+#' # To reduce load on CRAN servers, limit the number of samples, grid length, and CPU cores.
 #' set.seed(34)
 #' iris.dis <- dist(iris[,-5])
-#' est <- caviarpd(distance=iris.dis, mass=c(1, 2), nSamples=50, nCores=2)
-#' samples <- caviarpd(distance=iris.dis, mass=1, nSamples=50, samplesOnly=TRUE, nCores=2)
-#' est <- caviarpd(distance=iris.dis, nClusters=3, nSamples=100, nCores=2)
-#' est <- caviarpd(distance=iris.dis, nClusters=3:5, nSamples=100, nCores=2)
+#' est <- caviarpd(distance=iris.dis, mass=c(1, 2), nSamples=50, nCores=1)
+#' samples <- caviarpd(distance=iris.dis, mass=1, nSamples=50, samplesOnly=TRUE, nCores=1)
+#' est <- caviarpd(distance=iris.dis, nClusters=3, nSamples=50, nCores=1)
+#' est <- caviarpd(distance=iris.dis, nClusters=3:5, nSamples=50, gridLength=5, nCores=1)
 #' summ <- summary(est, orderingMethod=2)
 #' plot(summ, type="heatmap")
 #' plot(summ, type="mds")
@@ -94,7 +94,7 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
       if ( length(unique(est)) == 1 ) {
         sils[i] <- NA
       } else {
-        s <- summary(silhouette(est, 1-psm(samples)))
+        s <- summary(silhouette(est, 1-psm(samples, nCores)))
         sils[i] <- s$avg.width
       }
     }
@@ -168,5 +168,5 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
     stop("<impossible to get here because of previous check>")
   }
   if ( isTRUE(samplesOnly) ) return(samples)
-  suppressWarnings(salso(samples, loss=loss, maxNClusters=maxNClusters))
+  suppressWarnings(salso(samples, loss=loss, maxNClusters=maxNClusters, nCores=nCores))
 }

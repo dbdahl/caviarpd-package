@@ -23,13 +23,13 @@ caviarpd(
 \arguments{
 \item{distance}{A pairwise distance matrix of class 'dist'.}
 
-\item{nClusters}{A numeric vector giving the range for the number of clusters to consider when search for the mass parameter. Should be unset if the \code{mass} argument is used.}
+\item{nClusters}{A numeric vector that specifies the range for the number of clusters to consider in the search for a clustering estimate. Should be missing if the \code{mass} argument is used. See \code{Details}.}
 
-\item{mass}{The main tuning parameter governing the number of clusters, with higher values tends toward more clusters. Should be unset if the \code{nClusters} argument is provided.}
+\item{mass}{A numeric vector of mass values to consider in the search for a clustering estimate. Should be missing if the \code{nClusters} argument is used. See \code{Details}.}
 
 \item{nSamples}{The number of samples used to generate the clustering estimate.}
 
-\item{gridLength}{The length of the grid search for an optimal mass parameter. Only applicable if multiple values are provided for \code{nClusters}.}
+\item{gridLength}{The length of the grid search for an optimal mass parameter. Only applicable if a range of values are provided for \code{nClusters}.}
 
 \item{samplesOnly}{If TRUE, the function only returns the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.}
 
@@ -48,19 +48,32 @@ caviarpd(
 \item{nCores}{The number of CPU cores to use. A value of zero indicates to use all cores on the system.}
 }
 \value{
-A object of class \code{salso.estimate}, which provides a clustering estimate that can be displayed and plotted.
+A object of class \code{salso.estimate}, which provides a clustering estimate (a vector of cluster labels) that can be displayed and plotted.
 }
 \description{
 Returns a clustering estimate given pairwise distances using the CaviarPD method.
 }
+\details{
+The \code{mass} argument is the main tuning parameter governing the number of clusters,
+with higher values tending toward more clusters. The \code{mass} is a real number bounded
+below by \eqn{-}\code{discount}. When a vector of mass values is supplied, a clustering
+estimate for each mass value is generated and the best clustering estimate is returned.
+
+Alternatively, a range for the number of clusters to be considered can be supplied with the
+\code{nClusters} argument. Mass values that return a clustering estimate with the minimum and
+maximum value of the range will estimated. A grid of mass values (of length \code{gridLength}) between
+the estimated min and max cluster mass values will be considered in the search for a clustering
+estimate. If \code{nClusters} is a single integer, then a clustering estimate with \code{nClusters}
+clusters will be returned.
+}
 \examples{
-# To reduce load on CRAN servers, limit the number of samples and CPU cores.
+# To reduce load on CRAN servers, limit the number of samples, grid length, and CPU cores.
 set.seed(34)
 iris.dis <- dist(iris[,-5])
-est <- caviarpd(distance=iris.dis, mass=c(1, 2), nSamples=50, nCores=2)
-samples <- caviarpd(distance=iris.dis, mass=1, nSamples=50, samplesOnly=TRUE, nCores=2)
-est <- caviarpd(distance=iris.dis, nClusters=3, nSamples=100, nCores=2)
-est <- caviarpd(distance=iris.dis, nClusters=3:5, nSamples=100, nCores=2)
+est <- caviarpd(distance=iris.dis, mass=c(1, 2), nSamples=50, nCores=1)
+samples <- caviarpd(distance=iris.dis, mass=1, nSamples=50, samplesOnly=TRUE, nCores=1)
+est <- caviarpd(distance=iris.dis, nClusters=3, nSamples=50, nCores=1)
+est <- caviarpd(distance=iris.dis, nClusters=3:5, nSamples=50, gridLength=5, nCores=1)
 summ <- summary(est, orderingMethod=2)
 plot(summ, type="heatmap")
 plot(summ, type="mds")

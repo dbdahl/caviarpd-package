@@ -74,7 +74,7 @@ pub extern "C" fn sample_epa(
     discount: SEXP,
     n_cores: SEXP,
 ) -> SEXP {
-    let mut rng = Pcg64Mcg::from_seed(R::random_bytes_from_r::<16>());
+    let mut rng = Pcg64Mcg::from_seed(r::random_bytes_from_r::<16>());
     let n_samples = n_samples.as_usize();
     let n_items = similarity.nrow_usize();
     let (samples, _) = sample_epa_engine(
@@ -87,14 +87,14 @@ pub extern "C" fn sample_epa(
         &mut rng,
     );
     let n_samples = samples.len() / n_items;
-    let result = R::integer_matrix(i32::try_from(n_samples).unwrap(), i32::try_from(n_items).unwrap()).protect();
+    let result = r::integer_matrix(i32::try_from(n_samples).unwrap(), i32::try_from(n_items).unwrap()).protect();
     let result_slice = result.as_integer_slice_mut();
     for i in 0..n_items {
         for j in 0..n_samples {
             result_slice[i * n_samples + j] = i32::from(samples[j * n_items + i] + 1);
         }
     }
-    R::unprotect(1);
+    r::unprotect(1);
     result
 }
 
@@ -110,7 +110,7 @@ pub extern "C" fn caviarpd_n_clusters(
     max_size: SEXP,
     n_cores: SEXP,
 ) -> SEXP {
-    let mut rng = Pcg64Mcg::from_seed(R::random_bytes_from_r::<16>());
+    let mut rng = Pcg64Mcg::from_seed(r::random_bytes_from_r::<16>());
     let n_samples = n_samples.as_usize();
     let n_items = similarity.nrow_usize();
     let (samples, n_clusters) = sample_epa_engine(
@@ -149,5 +149,5 @@ pub extern "C" fn caviarpd_n_clusters(
         u32::try_from(n_cores.as_integer()).unwrap(),
         &mut rng,
     );
-    R::integer((fit.clustering.into_iter().max().unwrap() + 1) as i32)
+    r::integer((fit.clustering.into_iter().max().unwrap() + 1) as i32)
 }
