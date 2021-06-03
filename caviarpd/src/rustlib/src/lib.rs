@@ -2,8 +2,6 @@
 
 mod registration;
 
-// Help: https://docs.rs/libR-sys, https://github.com/hadley/r-internals
-
 use dahl_salso::clustering::Clusterings;
 use dahl_salso::optimize::{minimize_by_salso, SALSOParameters};
 use dahl_salso::{LabelType, LossFunction, PartitionDistributionInformation};

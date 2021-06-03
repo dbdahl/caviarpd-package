@@ -1,6 +1,11 @@
 #![allow(dead_code)]
 
-use crate::rinternals::*;
+// See:
+//   https://cran.r-project.org/doc/manuals/r-release/R-ints.html
+//   https://svn.r-project.org/R/trunk/src/include/Rinternals.h
+//   https://github.com/hadley/r-internals
+
+use crate::rbindings::*;
 use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::os::raw::{c_char, c_double, c_int};
@@ -26,16 +31,24 @@ pub fn random_bytes_from_r<const LENGTH: usize>() -> [u8; LENGTH] {
     }
 }
 
-pub unsafe fn print(x: &str) {
-    Rprintf(
-        b"%.*s\0".as_ptr() as *const c_char,
-        x.len(),
-        x.as_ptr() as *const c_char,
-    );
+pub fn print(x: &str) {
+    unsafe {
+        Rprintf(
+            b"%.*s\0".as_ptr() as *const c_char,
+            x.len(),
+            x.as_ptr() as *const c_char,
+        );
+    }
 }
 
 pub fn unprotect(x: c_int) {
-    unsafe { Rf_unprotect(x) }
+    unsafe {
+        Rf_unprotect(x);
+    }
+}
+
+pub fn logical(x: bool) -> SEXP {
+    unsafe { Rf_ScalarLogical(x.into()) }
 }
 
 pub fn integer(x: c_int) -> SEXP {
@@ -46,8 +59,13 @@ pub fn double(x: c_double) -> SEXP {
     unsafe { Rf_ScalarReal(x) }
 }
 
-pub fn logical(x: bool) -> SEXP {
-    unsafe { Rf_ScalarLogical(x.into()) }
+pub fn string(x: &str) -> SEXP {
+    let y = std::ffi::CString::new(x).unwrap();
+    unsafe { Rf_mkString(y.as_ptr()) }
+}
+
+pub fn logical_vector(len: isize) -> SEXP {
+    unsafe { Rf_allocVector(LGLSXP, len) }
 }
 
 pub fn integer_vector(len: isize) -> SEXP {
@@ -58,8 +76,8 @@ pub fn double_vector(len: isize) -> SEXP {
     unsafe { Rf_allocVector(REALSXP, len) }
 }
 
-pub fn logical_vector(len: isize) -> SEXP {
-    unsafe { Rf_allocVector(LGLSXP, len) }
+pub fn logical_matrix(nrow: c_int, ncol: c_int) -> SEXP {
+    unsafe { Rf_allocMatrix(LGLSXP, nrow, ncol) }
 }
 
 pub fn integer_matrix(nrow: c_int, ncol: c_int) -> SEXP {
@@ -70,10 +88,6 @@ pub fn double_matrix(nrow: c_int, ncol: c_int) -> SEXP {
     unsafe { Rf_allocMatrix(REALSXP, nrow, ncol) }
 }
 
-pub fn logical_matrix(nrow: c_int, ncol: c_int) -> SEXP {
-    unsafe { Rf_allocMatrix(LGLSXP, nrow, ncol) }
-}
-
 fn mk_dim_protected(dim: &[c_int]) -> SEXP {
     let dim2 = integer_vector(R_xlen_t::try_from(dim.len()).unwrap()).protect();
     fn m(x: &c_int) -> c_int {
@@ -81,6 +95,12 @@ fn mk_dim_protected(dim: &[c_int]) -> SEXP {
     }
     dim2.fill_integer_from(dim, m);
     dim2
+}
+
+pub fn logical_array(dim: &[c_int]) -> SEXP {
+    let result = unsafe { Rf_allocArray(LGLSXP, mk_dim_protected(dim)) };
+    unprotect(1);
+    result
 }
 
 pub fn integer_array(dim: &[c_int]) -> SEXP {
@@ -95,14 +115,12 @@ pub fn double_array(dim: &[c_int]) -> SEXP {
     result
 }
 
-pub fn logical_array(dim: &[c_int]) -> SEXP {
-    let result = unsafe { Rf_allocArray(LGLSXP, mk_dim_protected(dim)) };
-    unprotect(1);
-    result
-}
-
 pub trait SEXPExt {
-    fn protect(self) -> Self;
+    fn protect(self) -> SEXP;
+    fn duplicate(self) -> SEXP;
+    fn is_logical(self) -> bool;
+    fn is_integer(self) -> bool;
+    fn is_double(self) -> bool;
     fn as_logical(self) -> c_int;
     fn as_bool(self) -> bool;
     fn as_integer(self) -> c_int;
@@ -145,6 +163,24 @@ impl SEXPExt for SEXP {
     fn protect(self) -> Self {
         unsafe { Rf_protect(self) }
     }
+    fn duplicate(self) -> Self {
+        unsafe { Rf_duplicate(self) }
+    }
+    fn is_logical(self) -> bool {
+        unsafe { Rf_isLogical(self) != 0 }
+    }
+    fn is_integer(self) -> bool {
+        unsafe { Rf_isInteger(self) != 0 }
+    }
+    fn is_double(self) -> bool {
+        unsafe { Rf_isReal(self) != 0 }
+    }
+    fn as_logical(self) -> c_int {
+        unsafe { Rf_asLogical(self) }
+    }
+    fn as_bool(self) -> bool {
+        unsafe { Rf_asLogical(self) != 0 }
+    }
     fn as_integer(self) -> c_int {
         unsafe { Rf_asInteger(self) }
     }
@@ -154,11 +190,21 @@ impl SEXPExt for SEXP {
     fn as_double(self) -> c_double {
         unsafe { Rf_asReal(self) }
     }
-    fn as_logical(self) -> c_int {
-        unsafe { Rf_asLogical(self) }
+    fn as_logical_slice_mut(self) -> &'static mut [c_int] {
+        unsafe {
+            if Rf_isLogical(self) == 0 {
+                panic!("Object is not a logical.")
+            }
+            std::slice::from_raw_parts_mut(LOGICAL(self), self.xlength_usize())
+        }
     }
-    fn as_bool(self) -> bool {
-        unsafe { Rf_asLogical(self) != 0 }
+    fn as_logical_slice(self) -> &'static [c_int] {
+        unsafe {
+            if Rf_isLogical(self) == 0 {
+                panic!("Object is not a logical.")
+            }
+            std::slice::from_raw_parts(LOGICAL(self), self.xlength_usize())
+        }
     }
     fn as_integer_slice_mut(self) -> &'static mut [c_int] {
         unsafe {
@@ -192,22 +238,6 @@ impl SEXPExt for SEXP {
             std::slice::from_raw_parts(REAL(self), self.xlength_usize())
         }
     }
-    fn as_logical_slice_mut(self) -> &'static mut [c_int] {
-        unsafe {
-            if Rf_isLogical(self) == 0 {
-                panic!("Object is not a logical.")
-            }
-            std::slice::from_raw_parts_mut(LOGICAL(self), self.xlength_usize())
-        }
-    }
-    fn as_logical_slice(self) -> &'static [c_int] {
-        unsafe {
-            if Rf_isLogical(self) == 0 {
-                panic!("Object is not a logical.")
-            }
-            std::slice::from_raw_parts(LOGICAL(self), self.xlength_usize())
-        }
-    }
     fn as_raw_slice_mut(self) -> &'static mut [u8] {
         unsafe {
             if TYPEOF(self) == RAWSXP.try_into().unwrap() {
@@ -224,6 +254,12 @@ impl SEXPExt for SEXP {
             std::slice::from_raw_parts(RAW(self), self.xlength_usize())
         }
     }
+    fn fill_logical_from<T>(self, src: &[T], mapper: fn(&T) -> c_int) {
+        let dest = self.as_logical_slice_mut();
+        for (a, b) in dest.iter_mut().zip(src.iter()) {
+            *a = mapper(b);
+        }
+    }
     fn fill_integer_from<T>(self, src: &[T], mapper: fn(&T) -> c_int) {
         let dest = self.as_integer_slice_mut();
         for (a, b) in dest.iter_mut().zip(src.iter()) {
@@ -232,12 +268,6 @@ impl SEXPExt for SEXP {
     }
     fn fill_double_from<T>(self, src: &[T], mapper: fn(&T) -> c_double) {
         let dest = self.as_double_slice_mut();
-        for (a, b) in dest.iter_mut().zip(src.iter()) {
-            *a = mapper(b);
-        }
-    }
-    fn fill_logical_from<T>(self, src: &[T], mapper: fn(&T) -> c_int) {
-        let dest = self.as_logical_slice_mut();
         for (a, b) in dest.iter_mut().zip(src.iter()) {
             *a = mapper(b);
         }
