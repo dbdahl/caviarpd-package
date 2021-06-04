@@ -1,0 +1,13 @@
+Julia Haider <julia.haider@wu.ac.at>
+12:49 AM (9 hours ago)
+to CRAN, me
+
+Thanks,
+on its way to CRAN.
+
+Best,
+Julia Haider
+
+P.S. For future submissions/updates: If there are references describing
+the methods in your package, please add these in the description field
+of your DESCRIPTION file in the form e.g. authors (year) <doi:...>
