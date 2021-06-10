@@ -84,7 +84,7 @@ impl SquareMatrix {
     }
 
     pub fn view(&mut self) -> SquareMatrixBorrower {
-        SquareMatrixBorrower::from_slice(&mut self.data[..], self.n_items)
+        SquareMatrixBorrower::from_slice(&self.data[..], self.n_items)
     }
 
     pub fn n_items(&self) -> usize {
@@ -111,6 +111,9 @@ impl<'a> SquareMatrixBorrower<'a> {
         Self { data, n_items }
     }
 
+    /// # Safety
+    ///
+    /// You're on your own.
     pub unsafe fn from_ptr(data: *const f64, n_items: usize) -> Self {
         let data = slice::from_raw_parts(data, n_items * n_items);
         Self { data, n_items }
@@ -120,6 +123,9 @@ impl<'a> SquareMatrixBorrower<'a> {
         self.n_items
     }
 
+    /// # Safety
+    ///
+    /// You're on your own.
     pub unsafe fn get_unchecked(&self, (i, j): (usize, usize)) -> &f64 {
         self.data.get_unchecked(self.n_items * j + i)
     }
@@ -179,4 +185,3 @@ pub fn sample<T: Rng>(parameters: &EpaParameters, rng: &mut T) -> Clustering {
     }
     clustering
 }
-
