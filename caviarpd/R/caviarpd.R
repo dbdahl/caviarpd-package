@@ -83,7 +83,7 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
   similarity <- if ( similarity == "exponential" ) {
     exp( -temperature * as.matrix(distance) )
   } else if ( similarity == "reciprocal" ) {
-
+    1/as.matrix(distance)^temperature
   } else stop("Unsupported similarity")
   if ( ! all(is.finite(similarity)) ) stop("'distance', 'temperature', and/or 'similarity' yield similarity with nonfinite values")
 
