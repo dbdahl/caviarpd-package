@@ -14,6 +14,7 @@ caviarpd(
   loss = "binder",
   distr = "EPA",
   temperature = 10,
+  similarity = c("exponential", "reciprocal")[1],
   discount = 0,
   sd = 3,
   maxNClusters = 0,
@@ -38,6 +39,8 @@ caviarpd(
 \item{distr}{The random partition distribution used to generate samples.  This must be specified as either "EPA" or "ddCRP".}
 
 \item{temperature}{A positive number that accentuates or dampens distance between observations.}
+
+\item{similarity}{Either \code{"exponential"} or \code{"reciprocal"} to indicate the desired similarity function.}
 
 \item{discount}{A number in \eqn{[0,1)} giving the discount parameter to control the distribution of subset sizes.}
 

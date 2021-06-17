@@ -11,6 +11,7 @@
 #' @param loss The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".
 #' @param distr The random partition distribution used to generate samples.  This must be specified as either "EPA" or "ddCRP".
 #' @param temperature A positive number that accentuates or dampens distance between observations.
+#' @param similarity Either \code{"exponential"} or \code{"reciprocal"} to indicate the desired similarity function.
 #' @param discount A number in \eqn{[0,1)} giving the discount parameter to control the distribution of subset sizes.
 #' @param sd Number of standard deviations away from the expectation to be considered in finding boundary mass values.
 #' @param maxNClusters The maximum number of clusters that can be considered by the SALSO method.
@@ -54,7 +55,7 @@
 #' @importFrom stats uniroot
 #'
 caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, samplesOnly=FALSE,
-                     loss="binder", distr="EPA", temperature=10.0, discount=0.0, sd=3, maxNClusters=0, nCores=0) {
+                     loss="binder", distr="EPA", temperature=10.0, similarity=c("exponential","reciprocal")[1], discount=0.0, sd=3, maxNClusters=0, nCores=0) {
 
   if ( class(distance) != 'dist' ) stop("'distance' argument must be an object of class 'dist'")
   if ( !missing(nClusters) && (!is.numeric(nClusters) || !all(is.finite(nClusters)) || any(nClusters<1)) ) stop("'nClusters' must a numeric vector of finite values not less than 1")
@@ -66,6 +67,7 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
   if ( length(loss) != 1 || ! loss %in% c("VI","binder") ) stop("'loss' must be either 'binder' or 'VI'")
   if ( distr != "EPA" && distr != "ddCRP" ) stop("'distr' must be either 'EPA' or 'ddCRP'")
   if ( !is.numeric(temperature) || !is.vector(temperature) || length(temperature) != 1 || temperature < 0 ) stop("'temperature' must be nonnegative and length 1")
+  if ( !is.character(similarity) || length(similarity) != 1 || ! similarity %in% c("exponential","reciprocal") ) stop("'similarity' must be either 'exponential' or 'reciprocal'")
   if ( !is.numeric(sd) || length(sd) != 1 || sd < 1 || sd > 10 ) stop("'sd' must be nonnegative and between, say, 1 and 10")
   if ( !is.numeric(maxNClusters) || length(maxNClusters) != 1 || maxNClusters < 0 || maxNClusters %% 1 != 0 ) stop("'maxNClusters' must be 0 or a positive integer")
   if ( !is.numeric(nCores) || length(nCores) != 1 || nCores < 0 || nCores %% 1 != 0 ) stop("'nCores' must be 0 or a positive integer")
@@ -78,8 +80,12 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
   } else {
     stop("no more than 2 sample sizes may be specified in 'nSamples'")
   }
-  similarity <- exp( -temperature * as.matrix(distance) )
-  if ( any(is.nan(similarity)) ) stop("similarity implied by 'distance' and 'temperature' has NaN values")
+  similarity <- if ( similarity == "exponential" ) {
+    exp( -temperature * as.matrix(distance) )
+  } else if ( similarity == "reciprocal" ) {
+
+  } else stop("Unsupported similarity")
+  if ( ! all(is.finite(similarity)) ) stop("'distance', 'temperature', and/or 'similarity' yield similarity with nonfinite values")
 
   single <- function(grid) {
     n <- length(grid)
