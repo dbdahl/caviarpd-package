@@ -22,7 +22,7 @@ caviarpd(
 )
 }
 \arguments{
-\item{distance}{A pairwise distance matrix of class 'dist'.}
+\item{distance}{An object of class 'dist' or a pairwise distance matrix.}
 
 \item{nClusters}{A numeric vector that specifies the range for the number of clusters to consider in the search for a clustering estimate. Should be missing if the \code{mass} argument is used. See \code{Details}.}
 

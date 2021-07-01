@@ -2,7 +2,7 @@
 #'
 #' Returns a clustering estimate given pairwise distances using the CaviarPD method.
 #'
-#' @param distance A pairwise distance matrix of class 'dist'.
+#' @param distance An object of class 'dist' or a pairwise distance matrix.
 #' @param nClusters A numeric vector that specifies the range for the number of clusters to consider in the search for a clustering estimate. Should be missing if the \code{mass} argument is used. See `Details`.
 #' @param mass A numeric vector of mass values to consider in the search for a clustering estimate. Should be missing if the \code{nClusters} argument is used. See `Details`.
 #' @param nSamples The number of samples used to generate the clustering estimate.
@@ -56,8 +56,11 @@
 #'
 caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, samplesOnly=FALSE,
                      loss="binder", distr="EPA", temperature=10.0, similarity=c("exponential","reciprocal")[1], discount=0.0, sd=3, maxNClusters=0, nCores=0) {
-
-  if ( class(distance) != 'dist' ) stop("'distance' argument must be an object of class 'dist'")
+  if ( is.matrix(distance) ) {
+    if ( !isSymmetric(distance) || !is.numeric(distance) ) stop("'distance' is not a symmetric numerical matrix.")
+  } else if ( class(distance) == 'dist' ) {
+    distance <- as.matrix(distance)
+  } else stop("'distance' argument must be an object of class 'dist' or a symmetric numerical matrix.")
   if ( !missing(nClusters) && (!is.numeric(nClusters) || !all(is.finite(nClusters)) || any(nClusters<1)) ) stop("'nClusters' must a numeric vector of finite values not less than 1")
   if ( !is.numeric(discount) || length(discount) != 1 || discount < 0 || discount >= 1.0 ) stop("'discount' must be in [0,1) and length 1")
   if ( !missing(mass) && (!is.numeric(mass) || !all(is.finite(mass)) || any( mass <= -discount )) ) stop("if supplied, 'mass' must be a numeric vector of finite values greater than -'discount'")
@@ -81,9 +84,9 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
     stop("no more than 2 sample sizes may be specified in 'nSamples'")
   }
   similarity <- if ( similarity == "exponential" ) {
-    exp( -temperature * as.matrix(distance) )
+    exp( -temperature * distance )
   } else if ( similarity == "reciprocal" ) {
-    1/as.matrix(distance)^temperature
+    1/distance^temperature
   } else stop("Unsupported similarity")
   if ( ! all(is.finite(similarity)) ) stop("'distance', 'temperature', and/or 'similarity' yield similarity with nonfinite values")
 
