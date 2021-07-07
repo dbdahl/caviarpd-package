@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 mod registration;
 
 use dahl_salso::clustering::Clusterings;
@@ -64,46 +62,44 @@ fn sample_epa_engine<T: Rng>(
     (samples, n_clusters)
 }
 
-#[no_mangle]
-pub extern "C" fn sample_epa(
+#[roxido]
+fn sample_epa(
     n_samples: SEXP,
     similarity: SEXP,
     mass: SEXP,
     discount: SEXP,
     n_cores: SEXP,
 ) -> SEXP {
-    panic_to_error!({
-        let mut rng = Pcg64Mcg::from_seed(r::random_bytes::<16>());
-        let n_samples = n_samples.as_usize();
-        let n_items = similarity.nrow_usize();
-        let (samples, _) = sample_epa_engine(
-            n_samples,
-            n_items,
-            similarity.as_double_slice(),
-            mass.as_double(),
-            discount.as_double(),
-            usize::try_from(n_cores.as_integer()).unwrap(),
-            &mut rng,
-        );
-        let n_samples = samples.len() / n_items;
-        let result = r::integer_matrix(
-            i32::try_from(n_samples).unwrap(),
-            i32::try_from(n_items).unwrap(),
-        )
-        .protect();
-        let result_slice = result.as_integer_slice_mut();
-        for i in 0..n_items {
-            for j in 0..n_samples {
-                result_slice[i * n_samples + j] = i32::from(samples[j * n_items + i] + 1);
-            }
+    let mut rng = Pcg64Mcg::from_seed(r::random_bytes::<16>());
+    let n_samples = n_samples.as_usize();
+    let n_items = similarity.nrow_usize();
+    let (samples, _) = sample_epa_engine(
+        n_samples,
+        n_items,
+        similarity.as_double_slice(),
+        mass.as_double(),
+        discount.as_double(),
+        usize::try_from(n_cores.as_integer()).unwrap(),
+        &mut rng,
+    );
+    let n_samples = samples.len() / n_items;
+    let result = r::integer_matrix(
+        i32::try_from(n_samples).unwrap(),
+        i32::try_from(n_items).unwrap(),
+    )
+    .protect();
+    let result_slice = result.as_integer_slice_mut();
+    for i in 0..n_items {
+        for j in 0..n_samples {
+            result_slice[i * n_samples + j] = i32::from(samples[j * n_items + i] + 1);
         }
-        r::unprotect(1);
-        result
-    })
+    }
+    r::unprotect(1);
+    result
 }
 
-#[no_mangle]
-pub extern "C" fn caviarpd_n_clusters(
+#[roxido]
+fn caviarpd_n_clusters(
     n_samples: SEXP,
     similarity: SEXP,
     mass: SEXP,
@@ -113,46 +109,44 @@ pub extern "C" fn caviarpd_n_clusters(
     max_size: SEXP,
     n_cores: SEXP,
 ) -> SEXP {
-    panic_to_error!({
-        let mut rng = Pcg64Mcg::from_seed(r::random_bytes::<16>());
-        let n_samples = n_samples.as_usize();
-        let n_items = similarity.nrow_usize();
-        let (samples, n_clusters) = sample_epa_engine(
-            n_samples,
-            n_items,
-            similarity.as_double_slice(),
-            mass.as_double(),
-            discount.as_double(),
-            n_cores.as_usize(),
-            &mut rng,
-        );
-        let n_samples = samples.len() / n_items;
-        let clusterings = Clusterings::unvalidated(n_samples, n_items, samples, n_clusters);
-        let pdi = PartitionDistributionInformation::Draws(&clusterings);
-        let a = 1.0;
-        let loss_function = if use_vi.as_bool() {
-            LossFunction::VI(a)
-        } else {
-            LossFunction::BinderDraws(a)
-        };
-        let p = SALSOParameters {
-            n_items,
-            max_size: LabelType::try_from(max_size.as_integer()).unwrap(),
-            max_size_as_rf: false,
-            max_scans: u32::MAX,
-            max_zealous_updates: 10,
-            n_runs: u32::try_from(n_runs.as_integer()).unwrap(),
-            prob_sequential_allocation: 0.5,
-            prob_singletons_initialization: 0.0,
-        };
-        let fit = minimize_by_salso(
-            pdi,
-            loss_function,
-            &p,
-            f64::INFINITY,
-            u32::try_from(n_cores.as_integer()).unwrap(),
-            &mut rng,
-        );
-        r::integer_scalar((fit.clustering.into_iter().max().unwrap() + 1) as i32)
-    })
+    let mut rng = Pcg64Mcg::from_seed(r::random_bytes::<16>());
+    let n_samples = n_samples.as_usize();
+    let n_items = similarity.nrow_usize();
+    let (samples, n_clusters) = sample_epa_engine(
+        n_samples,
+        n_items,
+        similarity.as_double_slice(),
+        mass.as_double(),
+        discount.as_double(),
+        n_cores.as_usize(),
+        &mut rng,
+    );
+    let n_samples = samples.len() / n_items;
+    let clusterings = Clusterings::unvalidated(n_samples, n_items, samples, n_clusters);
+    let pdi = PartitionDistributionInformation::Draws(&clusterings);
+    let a = 1.0;
+    let loss_function = if use_vi.as_bool() {
+        LossFunction::VI(a)
+    } else {
+        LossFunction::BinderDraws(a)
+    };
+    let p = SALSOParameters {
+        n_items,
+        max_size: LabelType::try_from(max_size.as_integer()).unwrap(),
+        max_size_as_rf: false,
+        max_scans: u32::MAX,
+        max_zealous_updates: 10,
+        n_runs: u32::try_from(n_runs.as_integer()).unwrap(),
+        prob_sequential_allocation: 0.5,
+        prob_singletons_initialization: 0.0,
+    };
+    let fit = minimize_by_salso(
+        pdi,
+        loss_function,
+        &p,
+        f64::INFINITY,
+        u32::try_from(n_cores.as_integer()).unwrap(),
+        &mut rng,
+    );
+    r::integer_scalar((fit.clustering.into_iter().max().unwrap() + 1) as i32)
 }

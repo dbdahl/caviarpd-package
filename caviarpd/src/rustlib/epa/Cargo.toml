@@ -5,4 +5,4 @@ authors = ["David B. Dahl <dahl@stat.byu.edu>"]
 edition = "2018"
 
 [dependencies]
-rand = "0.8.3"
+rand = "0.8.4"
