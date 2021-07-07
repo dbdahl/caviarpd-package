@@ -13,14 +13,14 @@
 mod registration;
 use roxido::*;
 
-#[no_mangle]
-extern "C" fn sample_epa(nSamples: SEXP, similarity: SEXP, unnamed1: SEXP, discount: SEXP, nCores: SEXP) -> SEXP {
-    unsafe { rbindings::R_NilValue }
+#[roxido]
+fn sample_epa(nSamples: SEXP, similarity: SEXP, unnamed1: SEXP, discount: SEXP, nCores: SEXP) -> SEXP {
+    r::nil()
 }
 
-#[no_mangle]
-extern "C" fn caviarpd_n_clusters(nSamplesSearch: SEXP, similarity: SEXP, mass: SEXP, discount: SEXP, unnamed1: SEXP, unnamed2: SEXP, maxNClusters: SEXP, nCores: SEXP) -> SEXP {
-    unsafe { rbindings::R_NilValue }
+#[roxido]
+fn caviarpd_n_clusters(nSamplesSearch: SEXP, similarity: SEXP, mass: SEXP, discount: SEXP, unnamed1: SEXP, unnamed2: SEXP, maxNClusters: SEXP, nCores: SEXP) -> SEXP {
+    r::nil()
 }
 */
 
