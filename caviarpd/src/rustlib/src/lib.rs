@@ -77,9 +77,9 @@ fn sample_epa(
         n_samples,
         n_items,
         similarity.as_double_slice(),
-        mass.as_double(),
-        discount.as_double(),
-        usize::try_from(n_cores.as_integer()).unwrap(),
+        mass.as_double_scalar(),
+        discount.as_double_scalar(),
+        usize::try_from(n_cores.as_integer_scalar()).unwrap(),
         &mut rng,
     );
     let n_samples = samples.len() / n_items;
@@ -116,8 +116,8 @@ fn caviarpd_n_clusters(
         n_samples,
         n_items,
         similarity.as_double_slice(),
-        mass.as_double(),
-        discount.as_double(),
+        mass.as_double_scalar(),
+        discount.as_double_scalar(),
         n_cores.as_usize(),
         &mut rng,
     );
@@ -132,11 +132,11 @@ fn caviarpd_n_clusters(
     };
     let p = SALSOParameters {
         n_items,
-        max_size: LabelType::try_from(max_size.as_integer()).unwrap(),
+        max_size: LabelType::try_from(max_size.as_integer_scalar()).unwrap(),
         max_size_as_rf: false,
         max_scans: u32::MAX,
         max_zealous_updates: 10,
-        n_runs: u32::try_from(n_runs.as_integer()).unwrap(),
+        n_runs: u32::try_from(n_runs.as_integer_scalar()).unwrap(),
         prob_sequential_allocation: 0.5,
         prob_singletons_initialization: 0.0,
     };
@@ -145,7 +145,7 @@ fn caviarpd_n_clusters(
         loss_function,
         &p,
         f64::INFINITY,
-        u32::try_from(n_cores.as_integer()).unwrap(),
+        u32::try_from(n_cores.as_integer_scalar()).unwrap(),
         &mut rng,
     );
     r::integer_scalar((fit.clustering.into_iter().max().unwrap() + 1) as i32)

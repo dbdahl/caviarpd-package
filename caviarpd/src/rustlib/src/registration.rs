@@ -29,16 +29,16 @@ use roxido::*;
 #[no_mangle]
 extern "C" fn R_init_caviarpd_librust(info: *mut rbindings::DllInfo) {
     let mut call_routines = Vec::with_capacity(2);
-    let mut names = Vec::with_capacity(2);
-    names.push(std::ffi::CString::new(".sample_epa").unwrap());
+    let mut _names: Vec<std::ffi::CString> = Vec::with_capacity(2);
+    _names.push(std::ffi::CString::new(".sample_epa").unwrap());
     call_routines.push(rbindings::R_CallMethodDef {
-        name: names.last().unwrap().as_ptr(),
+        name: _names.last().unwrap().as_ptr(),
         fun: unsafe { std::mem::transmute(crate::sample_epa as *const u8) },
         numArgs: 5,
     });
-    names.push(std::ffi::CString::new(".caviarpd_n_clusters").unwrap());
+    _names.push(std::ffi::CString::new(".caviarpd_n_clusters").unwrap());
     call_routines.push(rbindings::R_CallMethodDef {
-        name: names.last().unwrap().as_ptr(),
+        name: _names.last().unwrap().as_ptr(),
         fun: unsafe { std::mem::transmute(crate::caviarpd_n_clusters as *const u8) },
         numArgs: 8,
     });
