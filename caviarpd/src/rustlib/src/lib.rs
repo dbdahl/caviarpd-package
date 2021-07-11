@@ -79,15 +79,11 @@ fn sample_epa(
         similarity.as_double_slice(),
         mass.as_f64(),
         discount.as_f64(),
-        usize::try_from(n_cores.as_i32()).unwrap(),
+        n_cores.as_usize(),
         &mut rng,
     );
     let n_samples = samples.len() / n_items;
-    let result = r::mk_integer_matrix(
-        i32::try_from(n_samples).unwrap(),
-        i32::try_from(n_items).unwrap(),
-    )
-    .protect();
+    let result = r::mk_integer_matrix(n_samples, n_items).protect();
     let result_slice = result.as_integer_slice_mut();
     for i in 0..n_items {
         for j in 0..n_samples {
