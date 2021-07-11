@@ -83,7 +83,7 @@ fn sample_epa(
         &mut rng,
     );
     let n_samples = samples.len() / n_items;
-    let result = r::integer_matrix(
+    let result = r::mk_integer_matrix(
         i32::try_from(n_samples).unwrap(),
         i32::try_from(n_items).unwrap(),
     )
@@ -148,5 +148,5 @@ fn caviarpd_n_clusters(
         u32::try_from(n_cores.as_i32()).unwrap(),
         &mut rng,
     );
-    r::integer_scalar(i32::try_from(fit.clustering.into_iter().max().unwrap() + 1).unwrap())
+    r::mk_integer_scalar(i32::try_from(fit.clustering.into_iter().max().unwrap() + 1).unwrap())
 }
