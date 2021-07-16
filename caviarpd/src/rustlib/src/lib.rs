@@ -10,6 +10,7 @@ use rand::SeedableRng;
 use rand_pcg::Pcg64Mcg;
 use roxido::*;
 use std::convert::TryFrom;
+use std::convert::TryInto;
 
 fn sample_epa_engine<T: Rng>(
     n_samples: usize,
@@ -64,15 +65,15 @@ fn sample_epa_engine<T: Rng>(
 
 #[roxido]
 fn sample_epa(
-    n_samples: SEXP,
-    similarity: SEXP,
-    mass: SEXP,
-    discount: SEXP,
-    n_cores: SEXP,
-) -> SEXP {
+    n_samples: Rval,
+    similarity: Rval,
+    mass: Rval,
+    discount: Rval,
+    n_cores: Rval,
+) -> Rval {
     let mut rng = Pcg64Mcg::from_seed(r::random_bytes::<16>());
     let n_samples = n_samples.as_usize();
-    let n_items = similarity.nrow_usize();
+    let n_items = similarity.nrow();
     let (samples, _) = sample_epa_engine(
         n_samples,
         n_items,
@@ -96,18 +97,18 @@ fn sample_epa(
 
 #[roxido]
 fn caviarpd_n_clusters(
-    n_samples: SEXP,
-    similarity: SEXP,
-    mass: SEXP,
-    discount: SEXP,
-    use_vi: SEXP,
-    n_runs: SEXP,
-    max_size: SEXP,
-    n_cores: SEXP,
-) -> SEXP {
+    n_samples: Rval,
+    similarity: Rval,
+    mass: Rval,
+    discount: Rval,
+    use_vi: Rval,
+    n_runs: Rval,
+    max_size: Rval,
+    n_cores: Rval,
+) -> Rval {
     let mut rng = Pcg64Mcg::from_seed(r::random_bytes::<16>());
     let n_samples = n_samples.as_usize();
-    let n_items = similarity.nrow_usize();
+    let n_items = similarity.nrow();
     let (samples, n_clusters) = sample_epa_engine(
         n_samples,
         n_items,
@@ -144,5 +145,6 @@ fn caviarpd_n_clusters(
         u32::try_from(n_cores.as_i32()).unwrap(),
         &mut rng,
     );
-    r::mk_integer_scalar(i32::try_from(fit.clustering.into_iter().max().unwrap() + 1).unwrap())
+    let result = fit.clustering.into_iter().max().unwrap() + 1;
+    result.try_into().unwrap()
 }

@@ -14,12 +14,12 @@ mod registration;
 use roxido::*;
 
 #[roxido]
-fn sample_epa(nSamples: SEXP, similarity: SEXP, unnamed1: SEXP, discount: SEXP, nCores: SEXP) -> SEXP {
+fn sample_epa(nSamples: Rval, similarity: Rval, unnamed1: Rval, discount: Rval, nCores: Rval) -> Rval {
     r::nil()
 }
 
 #[roxido]
-fn caviarpd_n_clusters(nSamplesSearch: SEXP, similarity: SEXP, mass: SEXP, discount: SEXP, unnamed1: SEXP, unnamed2: SEXP, maxNClusters: SEXP, nCores: SEXP) -> SEXP {
+fn caviarpd_n_clusters(nSamplesSearch: Rval, similarity: Rval, mass: Rval, discount: Rval, unnamed1: Rval, unnamed2: Rval, maxNClusters: Rval, nCores: Rval) -> Rval {
     r::nil()
 }
 */
