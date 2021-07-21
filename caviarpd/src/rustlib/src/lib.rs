@@ -77,21 +77,19 @@ fn sample_epa(
     let (samples, _) = sample_epa_engine(
         n_samples,
         n_items,
-        similarity.as_double_slice(),
-        mass.as_f64(),
-        discount.as_f64(),
+        similarity.try_into().unwrap(),
+        mass.into(),
+        discount.into(),
         n_cores.as_usize(),
         &mut rng,
     );
     let n_samples = samples.len() / n_items;
-    let result = r::mk_integer_matrix(n_samples, n_items).protect();
-    let result_slice = result.as_integer_slice_mut();
+    let (result, result_slice) = r::new_matrix_integer(n_samples, n_items);
     for i in 0..n_items {
         for j in 0..n_samples {
             result_slice[i * n_samples + j] = i32::from(samples[j * n_items + i] + 1);
         }
     }
-    r::unprotect(1);
     result
 }
 
@@ -112,9 +110,9 @@ fn caviarpd_n_clusters(
     let (samples, n_clusters) = sample_epa_engine(
         n_samples,
         n_items,
-        similarity.as_double_slice(),
-        mass.as_f64(),
-        discount.as_f64(),
+        similarity.try_into().unwrap(),
+        mass.into(),
+        discount.into(),
         n_cores.as_usize(),
         &mut rng,
     );
