@@ -84,7 +84,7 @@ fn sample_epa(
         &mut rng,
     );
     let n_samples = samples.len() / n_items;
-    let (result, result_slice) = r::new_matrix_integer(n_samples, n_items, &mut pc);
+    let (result, result_slice) = Rval::new_matrix_integer(n_samples, n_items, &mut pc);
     for i in 0..n_items {
         for j in 0..n_samples {
             result_slice[i * n_samples + j] = i32::from(samples[j * n_items + i] + 1);
