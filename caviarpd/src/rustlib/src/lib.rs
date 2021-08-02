@@ -65,12 +65,12 @@ fn sample_epa_engine<T: Rng>(
 
 #[roxido]
 fn sample_epa(
-    n_samples: Rval,
-    similarity: Rval,
-    mass: Rval,
-    discount: Rval,
-    n_cores: Rval,
-) -> Rval {
+    n_samples: Robj,
+    similarity: Robj,
+    mass: Robj,
+    discount: Robj,
+    n_cores: Robj,
+) -> Robj {
     let mut rng = Pcg64Mcg::from_seed(r::random_bytes::<16>());
     let n_samples = n_samples.as_usize();
     let n_items = similarity.nrow();
@@ -84,7 +84,7 @@ fn sample_epa(
         &mut rng,
     );
     let n_samples = samples.len() / n_items;
-    let (result, result_slice) = Rval::new_matrix_integer(n_samples, n_items, &mut pc);
+    let (result, result_slice) = Robj::new_matrix_integer(n_samples, n_items, &mut pc);
     for i in 0..n_items {
         for j in 0..n_samples {
             result_slice[i * n_samples + j] = i32::from(samples[j * n_items + i] + 1);
@@ -95,15 +95,15 @@ fn sample_epa(
 
 #[roxido]
 fn caviarpd_n_clusters(
-    n_samples: Rval,
-    similarity: Rval,
-    mass: Rval,
-    discount: Rval,
-    use_vi: Rval,
-    n_runs: Rval,
-    max_size: Rval,
-    n_cores: Rval,
-) -> Rval {
+    n_samples: Robj,
+    similarity: Robj,
+    mass: Robj,
+    discount: Robj,
+    use_vi: Robj,
+    n_runs: Robj,
+    max_size: Robj,
+    n_cores: Robj,
+) -> Robj {
     let mut rng = Pcg64Mcg::from_seed(r::random_bytes::<16>());
     let n_samples = n_samples.as_usize();
     let n_items = similarity.nrow();
@@ -144,5 +144,5 @@ fn caviarpd_n_clusters(
         &mut rng,
     );
     let result = fit.clustering.into_iter().max().unwrap() + 1;
-    Rval::try_new(result, &mut pc).unwrap()
+    Robj::try_new(result, &mut pc).unwrap()
 }
