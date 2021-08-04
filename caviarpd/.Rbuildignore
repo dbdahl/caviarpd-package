@@ -1,7 +1,5 @@
-^caviarpd\.Rproj$
+^.*\.Rproj$
 ^\.Rproj\.user$
-^src/rustlib/target$
-^src/rustlib/.+/target$
-^src/rustlib/.idea$
-^src/rustlib/.+/.idea$
 ^src/staticlib.tar.gz$
+^src/rustlib/(.*/)*target$
+^src/rustlib/(.*/)*\.idea$
