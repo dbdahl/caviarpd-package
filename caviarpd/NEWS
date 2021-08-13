@@ -1,3 +1,8 @@
+0.2.17 (2021-08-12)
+  * Port to use the cargo framework, dropping the dependency on the cargo
+    package.
+  * Bump all dependencies.
+
 0.2.13 (2021-06-17)
   * Added support for reciprocal similarity function.
 

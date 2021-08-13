@@ -4,9 +4,9 @@ version = 3
 
 [[package]]
 name = "approx"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f2a05fd1bd10b2527e20a2cd32d8873d115b8b39fe219ee25f42a8aca6ba278"
+checksum = "072df7202e63b127ab55acfe16ce97013d5b97bf160489336d3f1840fd78e99e"
 dependencies = [
  "num-traits",
 ]
@@ -112,9 +112,9 @@ dependencies = [
 
 [[package]]
 name = "dahl-salso"
-version = "0.5.6"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20dda8f2b742263e925c0b0a3603e4a062f344deb6b94c0a88bc90dea5e1f542"
+checksum = "a91a16bf8c1e93c7e9166fa94fc97114212e6e1d2abfc0a325303041882ec9df"
 dependencies = [
  "approx",
  "crossbeam",
@@ -123,7 +123,7 @@ dependencies = [
  "ndarray",
  "num_cpus",
  "rand",
- "rand_isaac",
+ "rand_pcg",
 ]
 
 [[package]]
@@ -161,9 +161,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.98"
+version = "0.2.99"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "320cfe77175da3a483efed4bc0adc1968ca050b098ce4f2f1c13a56626128790"
+checksum = "a7f823d141fe0a24df1e23b4af4e3c7ba9e5966ec514ea068c93024aa7deb765"
 
 [[package]]
 name = "matrixmultiply"
