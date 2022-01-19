@@ -36,7 +36,55 @@ impl<'a> EpaParameters<'a> {
     }
 
     pub fn shuffle_permutation<T: Rng>(&mut self, rng: &mut T) {
-        self.permutation.shuffle(rng);
+        match std::env::var("DBD_PERMUTATION").as_deref() {
+            Ok("shuffle") => self.permutation.shuffle(rng),
+            Ok("nearest") => {
+                self.permutation = {
+                    let mut permutation = Vec::with_capacity(self.permutation.n_items());
+                    let mut available: Vec<_> = (0..self.permutation.n_items()).collect();
+                    let start = rng.gen_range(0..available.len());
+                    let mut current_index = available.swap_remove(start);
+                    permutation.push(current_index);
+                    while !available.is_empty() {
+                        let mut best_value = f64::NEG_INFINITY;
+                        let mut best_index = usize::MAX;
+                        for (k, i) in available.iter().enumerate() {
+                            let candidate = self.similarity[(current_index, *i)];
+                            if candidate > best_value {
+                                best_value = candidate;
+                                best_index = k;
+                            }
+                        }
+                        current_index = available.swap_remove(best_index);
+                        permutation.push(current_index);
+                    }
+                    println!("nearest... {permutation:?}");
+                    Permutation::from_vector(permutation).unwrap()
+                }
+            }
+            Ok("randomnearest") => {
+                self.permutation = {
+                    let mut permutation = Vec::with_capacity(self.permutation.n_items());
+                    let mut available: Vec<_> = (0..self.permutation.n_items()).collect();
+                    let start = rng.gen_range(0..available.len());
+                    let mut current_index = available.swap_remove(start);
+                    permutation.push(current_index);
+                    while !available.is_empty() {
+                        let index_and_weights = available
+                            .iter()
+                            .map(|i| self.similarity[(current_index, *i)])
+                            .enumerate();
+                        let (index, _) =
+                            Clustering::select(index_and_weights, false, 0, Some(rng), false);
+                        current_index = available.swap_remove(index);
+                        permutation.push(current_index);
+                    }
+                    println!("randomnearest... {permutation:?}");
+                    Permutation::from_vector(permutation).unwrap()
+                }
+            }
+            _ => self.permutation.shuffle(rng),
+        }
     }
 }
 
@@ -157,9 +205,29 @@ pub fn sample<T: Rng>(parameters: &EpaParameters, rng: &mut T) -> Clustering {
     let ni = parameters.similarity.n_items();
     let mass = parameters.mass;
     let discount = parameters.discount;
+    let d2 = (1..ni).fold(
+        parameters.similarity[(
+            parameters.permutation.get(ni - 1),
+            parameters.permutation.get(0),
+        )],
+        |x, i| {
+            x + parameters.similarity[(
+                parameters.permutation.get(i - 1),
+                parameters.permutation.get(i),
+            )]
+        },
+    ) / (ni as f64);
+    println!("----\nd2: {d2}");
     let mut clustering = Clustering::unallocated(ni);
     for i in 0..ni {
         let ii = parameters.permutation.get(i);
+        let numerator = if i == 0 {
+            d2
+        } else {
+            parameters.similarity[(ii, parameters.permutation.get(i - 1))]
+        };
+        let jump_density = d2 / numerator;
+        println!("{i} {ii} {jump_density}");
         let qt = clustering.n_clusters() as f64;
         let kt = ((i as f64) - discount * qt)
             / parameters
@@ -170,7 +238,7 @@ pub fn sample<T: Rng>(parameters: &EpaParameters, rng: &mut T) -> Clustering {
             .map(|label| {
                 let n_items_in_cluster = clustering.size_of(label);
                 let weight = if n_items_in_cluster == 0 {
-                    mass + discount * qt
+                    (mass + discount * qt) * jump_density
                 } else {
                     kt * parameters
                         .similarity
@@ -178,9 +246,7 @@ pub fn sample<T: Rng>(parameters: &EpaParameters, rng: &mut T) -> Clustering {
                 };
                 (label, weight)
             });
-        let subset_index = clustering
-            .select(labels_and_weights, false, 0, Some(rng), true)
-            .0;
+        let subset_index = Clustering::select(labels_and_weights, false, 0, Some(rng), false).0;
         clustering.allocate(ii, subset_index);
     }
     clustering

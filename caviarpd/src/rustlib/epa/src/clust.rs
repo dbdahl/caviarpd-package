@@ -252,7 +252,6 @@ impl Clustering {
     }
 
     pub fn select<T: Rng, S: Iterator<Item = (usize, f64)>>(
-        &self,
         labels_and_weights: S,
         weights_on_log_scale: bool,
         label: usize,
