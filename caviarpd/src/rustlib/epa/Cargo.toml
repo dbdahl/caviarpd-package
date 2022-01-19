@@ -6,3 +6,4 @@ edition = "2021"
 
 [dependencies]
 rand = "0.8.4"
+roots = "0.0.7"

@@ -2,6 +2,7 @@
 
 use crate::clust::Clustering;
 use crate::perm::Permutation;
+use roots::find_root_regula_falsi as find_root;
 
 use rand::prelude::*;
 use std::slice;
@@ -174,8 +175,7 @@ impl<'a> SquareMatrixBorrower<'a> {
 
 pub fn sample<T: Rng>(parameters: &EpaParameters, rng: &mut T) -> Clustering {
     let ni = parameters.similarity.n_items();
-    let mass = parameters.mass;
-    let (path, avg) = match std::env::var("DBD_METHOD").as_deref() {
+    let (mass, path, avg) = match std::env::var("DBD_METHOD").as_deref() {
         Ok("jumps") => {
             let path: Vec<_> = std::iter::once(1.0)
                 .chain((1..ni).map(|i| {
@@ -186,9 +186,27 @@ pub fn sample<T: Rng>(parameters: &EpaParameters, rng: &mut T) -> Clustering {
                 }))
                 .collect();
             let avg = path.iter().sum::<f64>() / (ni as f64);
-            (Some(path), avg)
+            let mass = parameters.mass;
+            let expected_number_of_clusters =
+                (0..ni).fold(0.0, |sum, i| sum + mass / (mass + (i as f64)));
+            let f = |m| {
+                let exp = (0..ni).fold(0.0, |sum, i| {
+                    let p = m * avg / path[i];
+                    sum + p / (p + (i as f64))
+                });
+                exp - expected_number_of_clusters
+            };
+            let root = find_root(f64::EPSILON, mass, &f, &mut 1e-5_f64);
+            (
+                root.unwrap_or_else(|_| {
+                    println!("Root finding error.");
+                    mass
+                }),
+                Some(path),
+                avg,
+            )
         }
-        _ => (None, 1.0),
+        _ => (parameters.mass, None, 1.0),
     };
     let mut clustering = Clustering::unallocated(ni);
     for i in 0..ni {
