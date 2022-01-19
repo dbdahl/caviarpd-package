@@ -34,8 +34,8 @@ impl<'a> EpaParameters<'a> {
     }
 
     pub fn shuffle_permutation<T: Rng>(&mut self, rng: &mut T) {
-        match std::env::var("DBD_PERMUTATION").as_deref() {
-            Ok("biased") => {
+        match std::env::var("DBD_METHOD").as_deref() {
+            Ok("jumps" | "biased") => {
                 self.permutation = {
                     let mut permutation = Vec::with_capacity(self.permutation.n_items());
                     let mut available: Vec<_> = (0..self.permutation.n_items()).collect();
@@ -175,9 +175,9 @@ impl<'a> SquareMatrixBorrower<'a> {
 
 pub fn sample<T: Rng>(parameters: &EpaParameters, rng: &mut T) -> Clustering {
     let ni = parameters.similarity.n_items();
-    let (mass, path, avg) = match std::env::var("DBD_METHOD").as_deref() {
+    let (mass, path) = match std::env::var("DBD_METHOD").as_deref() {
         Ok("jumps") => {
-            let path: Vec<_> = std::iter::once(1.0)
+            let mut path: Vec<_> = std::iter::once(1.0)
                 .chain((1..ni).map(|i| {
                     parameters.similarity[(
                         parameters.permutation.get(i - 1),
@@ -186,15 +186,17 @@ pub fn sample<T: Rng>(parameters: &EpaParameters, rng: &mut T) -> Clustering {
                 }))
                 .collect();
             let avg = path.iter().sum::<f64>() / (ni as f64);
+            for p in &mut path {
+                *p = avg / *p;
+            }
             let mass = parameters.mass;
             let expected_number_of_clusters =
                 (0..ni).fold(0.0, |sum, i| sum + mass / (mass + (i as f64)));
             let f = |m| {
-                let exp = (0..ni).fold(0.0, |sum, i| {
-                    let p = m * avg / path[i];
+                (0..ni).fold(0.0, |sum, i| {
+                    let p = m * path[i];
                     sum + p / (p + (i as f64))
-                });
-                exp - expected_number_of_clusters
+                }) - expected_number_of_clusters
             };
             let root = find_root(f64::EPSILON, mass, &f, &mut 1e-5_f64);
             (
@@ -203,16 +205,15 @@ pub fn sample<T: Rng>(parameters: &EpaParameters, rng: &mut T) -> Clustering {
                     mass
                 }),
                 Some(path),
-                avg,
             )
         }
-        _ => (parameters.mass, None, 1.0),
+        _ => (parameters.mass, None),
     };
     let mut clustering = Clustering::unallocated(ni);
     for i in 0..ni {
         let ii = parameters.permutation.get(i);
         let jump_density = match path {
-            Some(ref path) => avg / path[i],
+            Some(ref path) => path[i],
             None => 1.0,
         };
         let kt = (i as f64)
