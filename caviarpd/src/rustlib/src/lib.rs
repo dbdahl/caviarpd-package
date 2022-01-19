@@ -17,7 +17,6 @@ fn sample_epa_engine<T: Rng>(
     n_items: usize,
     similarity: &[f64],
     mass: f64,
-    discount: f64,
     n_cores: usize,
     rng: &mut T,
 ) -> (Vec<LabelType>, Vec<LabelType>) {
@@ -49,7 +48,7 @@ fn sample_epa_engine<T: Rng>(
             s.spawn(move |_| {
                 let mut rng = Pcg64Mcg::new(p.2);
                 let mut params =
-                    EpaParameters::new(sim, Permutation::natural(n_items), mass, discount).unwrap();
+                    EpaParameters::new(sim, Permutation::natural(n_items), mass).unwrap();
                 for i in 0..n_samples_per_core {
                     params.shuffle_permutation(&mut rng);
                     let clustering = sample(&params, &mut rng);
@@ -64,13 +63,7 @@ fn sample_epa_engine<T: Rng>(
 }
 
 #[roxido]
-fn sample_epa(
-    n_samples: Rval,
-    similarity: Rval,
-    mass: Rval,
-    discount: Rval,
-    n_cores: Rval,
-) -> Rval {
+fn sample_epa(n_samples: Rval, similarity: Rval, mass: Rval, n_cores: Rval) -> Rval {
     let mut rng = Pcg64Mcg::from_seed(r::random_bytes::<16>());
     let n_samples = n_samples.as_usize();
     let n_items = similarity.nrow();
@@ -79,7 +72,6 @@ fn sample_epa(
         n_items,
         similarity.try_into().unwrap(),
         mass.into(),
-        discount.into(),
         n_cores.as_usize(),
         &mut rng,
     );
@@ -98,7 +90,6 @@ fn caviarpd_n_clusters(
     n_samples: Rval,
     similarity: Rval,
     mass: Rval,
-    discount: Rval,
     use_vi: Rval,
     n_runs: Rval,
     max_size: Rval,
@@ -112,7 +103,6 @@ fn caviarpd_n_clusters(
         n_items,
         similarity.try_into().unwrap(),
         mass.into(),
-        discount.into(),
         n_cores.as_usize(),
         &mut rng,
     );

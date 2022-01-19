@@ -7,12 +7,11 @@
 #' @param mass A numeric vector of mass values to consider in the search for a clustering estimate. Should be missing if the \code{nClusters} argument is used. See `Details`.
 #' @param nSamples The number of samples used to generate the clustering estimate.
 #' @param gridLength The length of the grid search for an optimal mass parameter. Only applicable if a range of values are provided for \code{nClusters}.
-#' @param samplesOnly If TRUE, the function only returns the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.
+#' @param samplesOnly If TRUE, the function only returns the samples generated for a given mass and temperature, rather than an actual clustering estimate.
 #' @param loss The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".
 #' @param distr The random partition distribution used to generate samples.  This must be specified as either "EPA" or "ddCRP".
 #' @param temperature A positive number that accentuates or dampens distance between observations.
 #' @param similarity Either \code{"exponential"} or \code{"reciprocal"} to indicate the desired similarity function.
-#' @param discount A number in \eqn{[0,1)} giving the discount parameter to control the distribution of subset sizes.
 #' @param sd Number of standard deviations away from the expectation to be considered in finding boundary mass values.
 #' @param maxNClusters The maximum number of clusters that can be considered by the SALSO method.
 #' @param nCores The number of CPU cores to use. A value of zero indicates to use all cores on the system.
@@ -20,7 +19,7 @@
 #' @details
 #' The \code{mass} argument is the main tuning parameter governing the number of clusters,
 #'  with higher values tending toward more clusters. The \code{mass} is a real number bounded
-#'  below by \eqn{-}\code{discount}. When a vector of mass values is supplied, a clustering
+#'  below by 0. When a vector of mass values is supplied, a clustering
 #'  estimate for each mass value is generated and the best clustering estimate is returned.
 #'
 #' Alternatively, a range for the number of clusters to be considered can be supplied with the
@@ -55,15 +54,14 @@
 #' @importFrom stats uniroot
 #'
 caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, samplesOnly=FALSE,
-                     loss="binder", distr="EPA", temperature=10.0, similarity=c("exponential","reciprocal")[1], discount=0.0, sd=3, maxNClusters=0, nCores=0) {
+                     loss="binder", distr="EPA", temperature=10.0, similarity=c("exponential","reciprocal")[1], sd=3, maxNClusters=0, nCores=0) {
   if ( is.matrix(distance) ) {
     if ( !isSymmetric(distance) || !is.numeric(distance) ) stop("'distance' is not a symmetric numerical matrix.")
   } else if ( class(distance) == 'dist' ) {
     distance <- as.matrix(distance)
   } else stop("'distance' argument must be an object of class 'dist' or a symmetric numerical matrix.")
   if ( !missing(nClusters) && (!is.numeric(nClusters) || !all(is.finite(nClusters)) || any(nClusters<1)) ) stop("'nClusters' must a numeric vector of finite values not less than 1")
-  if ( !is.numeric(discount) || length(discount) != 1 || discount < 0 || discount >= 1.0 ) stop("'discount' must be in [0,1) and length 1")
-  if ( !missing(mass) && (!is.numeric(mass) || !all(is.finite(mass)) || any( mass <= -discount )) ) stop("if supplied, 'mass' must be a numeric vector of finite values greater than -'discount'")
+  if ( !missing(mass) && (!is.numeric(mass) || !all(is.finite(mass)) || any( mass <= 0 )) ) stop("if supplied, 'mass' must be a numeric vector of finite values greater than 0")
   if ( !is.numeric(nSamples) || ! length(nSamples) %in% c(1,2) || any(nSamples <= 0) || any(nSamples %% 1 != 0) ) stop("'nSamples' must be a strictly positive and length 1 or 2")
   if ( !is.numeric(gridLength) || length(gridLength) != 1 || gridLength < 2 || gridLength %% 1 != 0 ) stop("'gridLength' must be a strictly positive integer not less than 2")
   if ( !is.logical(samplesOnly) || !is.vector(samplesOnly) || length(samplesOnly) != 1 || ! samplesOnly %in% c(TRUE,FALSE) ) stop("'samplesOnly' must be a TRUE or FALSE")
@@ -95,7 +93,7 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
     sils <-  numeric(n)
     for ( i in 1:n ) {
       samples <- if ( distr=="EPA" ) {
-        .Call(.sample_epa, nSamples, similarity, grid[i], discount, nCores)
+        .Call(.sample_epa, nSamples, similarity, grid[i], nCores)
       } else {
         samplePartition(DDCRPPartition(similarity=similarity, mass=grid[i]), nSamples, randomizePermutation=TRUE)
       }
@@ -115,12 +113,12 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
   }
 
   rootfinder <- function(ncl) {
-    if ( ncl == 1 ) return(-discount + .Machine$double.eps)
+    if ( ncl == 1 ) return(0.0 + .Machine$double.eps)
     n <- nrow(similarity)
     nsubsets.average <- function(mass, n) sum(mass / (mass + 1:n - 1))
     nsubsets.variance <- function(mass, n) sum((mass * (1:n - 1)) / (mass + 1:n - 1)^2)
     nclust <- function(mass) {
-      .Call(.caviarpd_n_clusters, nSamplesSearch, similarity, mass, discount, loss=="VI", 16, maxNClusters, nCores)
+      .Call(.caviarpd_n_clusters, nSamplesSearch, similarity, mass, loss=="VI", 16, maxNClusters, nCores)
     }
 
     sd.lwr <- if ( loss=='VI' ) { .5 * sd } else sd
@@ -170,7 +168,7 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
 
   mass <- best
   samples <- if (distr=="EPA") {
-    .Call(.sample_epa, nSamples, similarity, mass, discount, nCores)
+    .Call(.sample_epa, nSamples, similarity, mass, nCores)
   } else if (distr=="ddCRP") {
     samplePartition(DDCRPPartition(similarity=similarity, mass=mass), nSamples, randomizePermutation=TRUE)
   } else {

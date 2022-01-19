@@ -13,7 +13,6 @@ pub struct EpaParameters<'a> {
     similarity: SimilarityBorrower<'a>,
     permutation: Permutation,
     mass: f64,
-    discount: f64,
 }
 
 impl<'a> EpaParameters<'a> {
@@ -21,7 +20,6 @@ impl<'a> EpaParameters<'a> {
         similarity: SimilarityBorrower<'a>,
         permutation: Permutation,
         mass: f64,
-        discount: f64,
     ) -> Option<Self> {
         if similarity.n_items() != permutation.n_items() {
             None
@@ -30,14 +28,12 @@ impl<'a> EpaParameters<'a> {
                 similarity,
                 permutation,
                 mass,
-                discount,
             })
         }
     }
 
     pub fn shuffle_permutation<T: Rng>(&mut self, rng: &mut T) {
         match std::env::var("DBD_PERMUTATION").as_deref() {
-            Ok("uniform") => self.permutation.shuffle(rng),
             Ok("biased") => {
                 self.permutation = {
                     let mut permutation = Vec::with_capacity(self.permutation.n_items());
@@ -179,7 +175,6 @@ impl<'a> SquareMatrixBorrower<'a> {
 pub fn sample<T: Rng>(parameters: &EpaParameters, rng: &mut T) -> Clustering {
     let ni = parameters.similarity.n_items();
     let mass = parameters.mass;
-    let discount = parameters.discount;
     let (path, avg) = match std::env::var("DBD_METHOD").as_deref() {
         Ok("jumps") => {
             let path: Vec<_> = std::iter::once(1.0)
@@ -202,8 +197,7 @@ pub fn sample<T: Rng>(parameters: &EpaParameters, rng: &mut T) -> Clustering {
             Some(ref path) => avg / path[i],
             None => 1.0,
         };
-        let qt = clustering.n_clusters() as f64;
-        let kt = ((i as f64) - discount * qt)
+        let kt = (i as f64)
             / parameters
                 .similarity
                 .sum_of_row_subset(ii, parameters.permutation.slice_until(i));
@@ -212,7 +206,7 @@ pub fn sample<T: Rng>(parameters: &EpaParameters, rng: &mut T) -> Clustering {
             .map(|label| {
                 let n_items_in_cluster = clustering.size_of(label);
                 let weight = if n_items_in_cluster == 0 {
-                    (mass + discount * qt) * jump_density
+                    mass * jump_density
                 } else {
                     kt * parameters
                         .similarity

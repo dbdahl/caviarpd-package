@@ -14,12 +14,12 @@ mod registration;
 use roxido::*;
 
 #[roxido]
-fn sample_epa(nSamples: Rval, similarity: Rval, unnamed1: Rval, discount: Rval, nCores: Rval) -> Rval {
+fn sample_epa(nSamples: Rval, similarity: Rval, unnamed1: Rval, nCores: Rval) -> Rval {
     Rval::nil()
 }
 
 #[roxido]
-fn caviarpd_n_clusters(nSamplesSearch: Rval, similarity: Rval, mass: Rval, discount: Rval, unnamed1: Rval, unnamed2: Rval, maxNClusters: Rval, nCores: Rval) -> Rval {
+fn caviarpd_n_clusters(nSamplesSearch: Rval, similarity: Rval, mass: Rval, unnamed1: Rval, unnamed2: Rval, maxNClusters: Rval, nCores: Rval) -> Rval {
     Rval::nil()
 }
 */
@@ -34,13 +34,13 @@ extern "C" fn R_init_caviarpd_librust(info: *mut rbindings::DllInfo) {
     call_routines.push(rbindings::R_CallMethodDef {
         name: _names.last().unwrap().as_ptr(),
         fun: unsafe { std::mem::transmute(crate::sample_epa as *const u8) },
-        numArgs: 5,
+        numArgs: 4,
     });
     _names.push(std::ffi::CString::new(".caviarpd_n_clusters").unwrap());
     call_routines.push(rbindings::R_CallMethodDef {
         name: _names.last().unwrap().as_ptr(),
         fun: unsafe { std::mem::transmute(crate::caviarpd_n_clusters as *const u8) },
-        numArgs: 8,
+        numArgs: 7,
     });
     call_routines.push(rbindings::R_CallMethodDef {
         name: std::ptr::null(),
