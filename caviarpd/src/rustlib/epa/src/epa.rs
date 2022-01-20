@@ -198,10 +198,10 @@ pub fn sample<T: Rng>(parameters: &EpaParameters, rng: &mut T) -> Clustering {
                     sum + p / (p + (i as f64))
                 }) - expected_number_of_clusters
             };
-            let root = find_root(f64::EPSILON, mass, &f, &mut 1e-5_f64);
+            let root = find_root(f64::EPSILON, 10.0 * mass, &f, &mut 1e-5_f64);
             (
-                root.unwrap_or_else(|_| {
-                    println!("Root finding error.");
+                root.unwrap_or_else(|e| {
+                    println!("Root finding error.... {e}");
                     mass
                 }),
                 Some(path),
