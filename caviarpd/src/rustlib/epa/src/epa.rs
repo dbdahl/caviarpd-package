@@ -187,7 +187,7 @@ pub fn sample<T: Rng>(parameters: &EpaParameters, rng: &mut T) -> Clustering {
                 .collect();
             let avg = path.iter().sum::<f64>() / (ni as f64);
             for p in &mut path {
-                *p = avg / *p;
+                *p = (avg / *p).min(100.0);
             }
             let mass = parameters.mass;
             let expected_number_of_clusters =

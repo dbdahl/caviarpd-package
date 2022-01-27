@@ -14,6 +14,7 @@
 #' @param similarity Either \code{"exponential"} or \code{"reciprocal"} to indicate the desired similarity function.
 #' @param sd Number of standard deviations away from the expectation to be considered in finding boundary mass values.
 #' @param maxNClusters The maximum number of clusters that can be considered by the SALSO method.
+#' @param nRuns The number of runs of the SALSO algorithm.
 #' @param nCores The number of CPU cores to use. A value of zero indicates to use all cores on the system.
 #'
 #' @details
@@ -54,7 +55,7 @@
 #' @importFrom stats uniroot
 #'
 caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, samplesOnly=FALSE,
-                     loss="binder", distr="EPA", temperature=10.0, similarity=c("exponential","reciprocal")[1], sd=3, maxNClusters=0, nCores=0) {
+                     loss="binder", distr="EPA", temperature=10.0, similarity=c("exponential","reciprocal")[1], sd=3, maxNClusters=0, nRuns=16, nCores=0) {
   if ( is.matrix(distance) ) {
     if ( !isSymmetric(distance) || !is.numeric(distance) ) stop("'distance' is not a symmetric numerical matrix.")
   } else if ( class(distance) == 'dist' ) {
@@ -65,7 +66,9 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
   if ( !is.numeric(nSamples) || ! length(nSamples) %in% c(1,2) || any(nSamples <= 0) || any(nSamples %% 1 != 0) ) stop("'nSamples' must be a strictly positive and length 1 or 2")
   if ( !is.numeric(gridLength) || length(gridLength) != 1 || gridLength < 2 || gridLength %% 1 != 0 ) stop("'gridLength' must be a strictly positive integer not less than 2")
   if ( !is.logical(samplesOnly) || !is.vector(samplesOnly) || length(samplesOnly) != 1 || ! samplesOnly %in% c(TRUE,FALSE) ) stop("'samplesOnly' must be a TRUE or FALSE")
-  # if ( length(loss) != 1 || ! loss %in% c("VI","binder") ) stop("'loss' must be either 'binder' or 'VI'")
+  doBinder <- identical(loss,'binder') || ( inherits(loss,'salso.loss') && identical(loss$loss,'binder') )
+  doVI <- identical(loss,'VI') || ( inherits(loss,'salso.loss') && identical(loss$loss,'VI') )
+  if ( !doVI && !doBinder ) stop("'loss' must be either 'binder' or 'VI'")
   if ( distr != "EPA" && distr != "ddCRP" ) stop("'distr' must be either 'EPA' or 'ddCRP'")
   if ( !is.numeric(temperature) || !is.vector(temperature) || length(temperature) != 1 || temperature < 0 ) stop("'temperature' must be nonnegative and length 1")
   if ( !is.character(similarity) || length(similarity) != 1 || ! similarity %in% c("exponential","reciprocal") ) stop("'similarity' must be either 'exponential' or 'reciprocal'")
@@ -118,10 +121,10 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
     nsubsets.average <- function(mass, n) sum(mass / (mass + 1:n - 1))
     nsubsets.variance <- function(mass, n) sum((mass * (1:n - 1)) / (mass + 1:n - 1)^2)
     nclust <- function(mass) {
-      .Call(.caviarpd_n_clusters, nSamplesSearch, similarity, mass, loss=="VI", 16, maxNClusters, nCores)
+      .Call(.caviarpd_n_clusters, nSamplesSearch, similarity, mass, doVI, nRuns, maxNClusters, nCores)
     }
 
-    sd.lwr <- if ( loss=='VI' ) { .5 * sd } else sd
+    sd.lwr <- if ( doVI ) { .5 * sd } else sd
 
     # Function to find the lower mass bound for a given cluster count
     lwr <- function(nClusters) { function(m) { nsubsets.average(m, n) +
@@ -175,5 +178,9 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
     stop("<impossible to get here because of previous check>")
   }
   if ( isTRUE(samplesOnly) ) return(samples)
-  suppressWarnings(salso(samples, loss=loss, maxNClusters=maxNClusters, nCores=nCores))
+  suppressWarnings(salso(samples, loss=loss, maxNClusters=maxNClusters, nRuns=nRuns, nCores=nCores))
+}
+
+mass <- function(expected_number_of_clusters, n_items) {
+  .Call(.caviarpd_mass, expected_number_of_clusters, n_items)
 }

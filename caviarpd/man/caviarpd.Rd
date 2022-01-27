@@ -15,9 +15,9 @@ caviarpd(
   distr = "EPA",
   temperature = 10,
   similarity = c("exponential", "reciprocal")[1],
-  discount = 0,
   sd = 3,
   maxNClusters = 0,
+  nRuns = 16,
   nCores = 0
 )
 }
@@ -32,7 +32,7 @@ caviarpd(
 
 \item{gridLength}{The length of the grid search for an optimal mass parameter. Only applicable if a range of values are provided for \code{nClusters}.}
 
-\item{samplesOnly}{If TRUE, the function only returns the samples generated for a given mass, temperature, and discount rather than an actual clustering estimate.}
+\item{samplesOnly}{If TRUE, the function only returns the samples generated for a given mass and temperature, rather than an actual clustering estimate.}
 
 \item{loss}{The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".}
 
@@ -42,11 +42,11 @@ caviarpd(
 
 \item{similarity}{Either \code{"exponential"} or \code{"reciprocal"} to indicate the desired similarity function.}
 
-\item{discount}{A number in \eqn{[0,1)} giving the discount parameter to control the distribution of subset sizes.}
-
 \item{sd}{Number of standard deviations away from the expectation to be considered in finding boundary mass values.}
 
 \item{maxNClusters}{The maximum number of clusters that can be considered by the SALSO method.}
+
+\item{nRuns}{The number of runs of the SALSO algorithm.}
 
 \item{nCores}{The number of CPU cores to use. A value of zero indicates to use all cores on the system.}
 }
@@ -59,7 +59,7 @@ Returns a clustering estimate given pairwise distances using the CaviarPD method
 \details{
 The \code{mass} argument is the main tuning parameter governing the number of clusters,
 with higher values tending toward more clusters. The \code{mass} is a real number bounded
-below by \eqn{-}\code{discount}. When a vector of mass values is supplied, a clustering
+below by 0. When a vector of mass values is supplied, a clustering
 estimate for each mass value is generated and the best clustering estimate is returned.
 
 Alternatively, a range for the number of clusters to be considered can be supplied with the

@@ -8,6 +8,7 @@ use epa::perm::Permutation;
 use rand::Rng;
 use rand::SeedableRng;
 use rand_pcg::Pcg64Mcg;
+use roots::find_root_regula_falsi as find_root;
 use roxido::*;
 use std::convert::TryFrom;
 use std::convert::TryInto;
@@ -135,4 +136,35 @@ fn caviarpd_n_clusters(
     );
     let result = fit.clustering.into_iter().max().unwrap() + 1;
     Rval::try_new(result, &mut pc).unwrap()
+}
+
+fn expected_number_of_clusters(mass: f64, n_items: usize) -> f64 {
+    (0..n_items).fold(0.0, |sum, i| sum + mass / (mass + (i as f64)))
+}
+
+fn mass(enoc: f64, n_items: usize) -> f64 {
+    let f = |mass| expected_number_of_clusters(mass, n_items) - enoc;
+    match find_root(f64::EPSILON, enoc, &f, &mut 1e-5_f64) {
+        Ok(root) => root,
+        Err(e) => {
+            println!("Root finding error.... {e}");
+            1.0
+        }
+    }
+}
+
+#[roxido]
+fn caviarpd_expected_number_of_clusters(mass: Rval, n_items: Rval) -> Rval {
+    Rval::new(
+        expected_number_of_clusters(mass.as_f64(), n_items.as_usize()),
+        &mut pc,
+    )
+}
+
+#[roxido]
+fn caviarpd_mass(expected_number_of_clusters: Rval, n_items: Rval) -> Rval {
+    Rval::new(
+        mass(expected_number_of_clusters.as_f64(), n_items.as_usize()),
+        &mut pc,
+    )
 }
