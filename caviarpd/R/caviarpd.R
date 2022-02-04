@@ -100,7 +100,7 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
       } else {
         samplePartition(DDCRPPartition(similarity=similarity, mass=grid[i]), nSamples, randomizePermutation=TRUE)
       }
-      est <- suppressWarnings(salso(samples, loss=loss, maxNClusters=maxNClusters))
+      est <- suppressWarnings(salso(samples, loss=loss, maxNClusters=maxNClusters, nCores=nCores))
       if ( length(unique(est)) == 1 ) {
         sils[i] <- NA
       } else {
