@@ -181,6 +181,92 @@ caviarpd <- function(distance, nClusters, mass, nSamples=1000, gridLength=10, sa
   suppressWarnings(salso(samples, loss=loss, maxNClusters=maxNClusters, nRuns=nRuns, nCores=nCores))
 }
 
+#' Cluster Analysis via Random Partition Distributions
+#'
+#' Returns a clustering estimate given pairwise distances using the CaviarPD method.
+#'
+#' @param distance An object of class 'dist' or a pairwise distance matrix.
+#' @param nClusters A numeric vector that specifies the range for the number of clusters to consider in the search for a clustering estimate. Should be missing if the \code{mass} argument is used. See `Details`.
+#' @param nSamples The number of samples used to generate the clustering estimate.
+#' @param gridLength The length of the grid search for an optimal mass parameter. Only applicable if a range of values are provided for \code{nClusters}.
+#' @param n0 An undocumented tuning parameter.
+#' @param tol An undocumented tuning parameter.
+#' @param loss The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".
+#' @param temperature A positive number that accentuates or dampens distance between observations.
+#' @param similarity Either \code{"exponential"} or \code{"reciprocal"} to indicate the desired similarity function.
+#' @param maxNClusters The maximum number of clusters that can be considered by the SALSO method.
+#' @param nRuns The number of runs of the SALSO algorithm.
+#' @param nCores The number of CPU cores to use. A value of zero indicates to use all cores on the system.
+#'
+#' @details
+#' The \code{mass} argument is the main tuning parameter governing the number of clusters,
+#'  with higher values tending toward more clusters. The \code{mass} is a real number bounded
+#'  below by 0. When a vector of mass values is supplied, a clustering
+#'  estimate for each mass value is generated and the best clustering estimate is returned.
+#'
+#' Alternatively, a range for the number of clusters to be considered can be supplied with the
+#'  \code{nClusters} argument. Mass values that return a clustering estimate with the minimum and
+#'  maximum value of the range will estimated. A grid of mass values (of length \code{gridLength}) between
+#'  the estimated min and max cluster mass values will be considered in the search for a clustering
+#'  estimate. If \code{nClusters} is a single integer, then a clustering estimate with \code{nClusters}
+#'  clusters will be returned.
+#'
+#' @return A object of class \code{salso.estimate}, which provides a clustering estimate (a vector of cluster labels) that can be displayed and plotted.
+#'
+#' @references
+#'
+#' D. B. Dahl, D. J. Johnson, and P. Müller (2021), Search Algorithms and Loss
+#' Functions for Bayesian Clustering, [arXiv:2105.04451](https://arxiv.org/abs/2105.04451).
+#'
+#' @examples
+#' # To reduce load on CRAN servers, limit the number of samples, grid length, and CPU cores.
+#' set.seed(34)
+#' iris.dis <- dist(iris[,-5])
+#' est <- caviarpd(distance=iris.dis, mass=c(1, 2), nSamples=50, nCores=1)
+#' samples <- caviarpd(distance=iris.dis, mass=1, nSamples=50, samplesOnly=TRUE, nCores=1)
+#' est <- caviarpd(distance=iris.dis, nClusters=3, nSamples=50, nCores=1)
+#' est <- caviarpd(distance=iris.dis, nClusters=3:5, nSamples=50, gridLength=5, nCores=1)
+#' summ <- summary(est, orderingMethod=2)
+#' plot(summ, type="heatmap")
+#' plot(summ, type="mds")
+#'
+#' @export
+#' @importFrom salso salso psm
+#' @importFrom cluster silhouette
+#' @importFrom stats uniroot
+#'
+caviarpd2 <- function(distance, nClusters, nSamples=500, gridLength=10, n0=100, tol=0.01,
+                     loss="binder", temperature=10.0, similarity=c("exponential","reciprocal")[1], maxNClusters=0, nRuns=16, nCores=0) {
+  if ( is.matrix(distance) ) {
+    if ( !isSymmetric(distance) || !is.numeric(distance) ) stop("'distance' is not a symmetric numerical matrix.")
+  } else if ( class(distance) == 'dist' ) {
+    distance <- as.matrix(distance)
+  } else stop("'distance' argument must be an object of class 'dist' or a symmetric numerical matrix.")
+  if ( !is.numeric(nClusters) || !all(is.finite(nClusters)) || any(nClusters<1) ) stop("'nClusters' must a numeric vector of finite values not less than 1")
+  if ( !is.numeric(nSamples) || ! length(nSamples) %in% c(1,2) || any(nSamples <= 0) || any(nSamples %% 1 != 0) ) stop("'nSamples' must be a strictly positive and length 1 or 2")
+  if ( !is.numeric(gridLength) || length(gridLength) != 1 || gridLength < 2 || gridLength %% 1 != 0 ) stop("'gridLength' must be a strictly positive integer not less than 2")
+  doBinder <- identical(loss,'binder') || ( inherits(loss,'salso.loss') && identical(loss$loss,'binder') )
+  doVI <- identical(loss,'VI') || ( inherits(loss,'salso.loss') && identical(loss$loss,'VI') )
+  if ( !doVI && !doBinder ) stop("'loss' must be either 'binder' or 'VI'")
+  if ( !is.numeric(temperature) || !is.vector(temperature) || length(temperature) != 1 || temperature < 0 ) stop("'temperature' must be nonnegative and length 1")
+  if ( !is.character(similarity) || length(similarity) != 1 || ! similarity %in% c("exponential","reciprocal") ) stop("'similarity' must be either 'exponential' or 'reciprocal'")
+  if ( !is.numeric(maxNClusters) || length(maxNClusters) != 1 || maxNClusters < 0 || maxNClusters %% 1 != 0 ) stop("'maxNClusters' must be 0 or a positive integer")
+  if ( maxNClusters == 0 ) maxNClusters <- max(nClusters) + 1
+  if ( !is.numeric(nRuns) || length(nRuns) != 1 || nRuns < 1 || nRuns %% 1 != 0 ) stop("'nRuns' must be a strictly positive integer")
+  if ( !is.numeric(nCores) || length(nCores) != 1 || nCores < 0 || nCores %% 1 != 0 ) stop("'nCores' must be 0 or a positive integer")
+  similarity <- if ( similarity == "exponential" ) {
+    exp( -temperature * distance )
+  } else if ( similarity == "reciprocal" ) {
+    1/distance^temperature
+  } else stop("Unsupported similarity")
+  if ( ! all(is.finite(similarity)) ) stop("'distance', 'temperature', and/or 'similarity' yield similarity with nonfinite values")
+  .Call(.caviarpd_algorithm2, similarity, min(nClusters), max(nClusters), nSamples, gridLength, n0, tol, doVI, maxNClusters, nRuns, nCores)
+}
+
 mass <- function(expected_number_of_clusters, n_items) {
   .Call(.caviarpd_mass, expected_number_of_clusters, n_items)
+}
+
+sampleEPA <- function(similarity, mass, nSamples=500, nCores=0) {
+  .Call(.sample_epa, nSamples, similarity, mass, nCores)
 }
