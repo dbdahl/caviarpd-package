@@ -7,42 +7,33 @@
 caviarpd(
   distance,
   nClusters,
-  mass,
-  nSamples = 1000,
+  mass = NULL,
+  nSamples = 500,
   gridLength = 10,
-  samplesOnly = FALSE,
   loss = "binder",
-  distr = "EPA",
   temperature = 10,
   similarity = c("exponential", "reciprocal")[1],
-  sd = 3,
   maxNClusters = 0,
-  nRuns = 16,
-  nCores = 0
+  nRuns = 4,
+  nCores = nRuns
 )
 }
 \arguments{
 \item{distance}{An object of class 'dist' or a pairwise distance matrix.}
 
-\item{nClusters}{A numeric vector that specifies the range for the number of clusters to consider in the search for a clustering estimate. Should be missing if the \code{mass} argument is used. See \code{Details}.}
+\item{nClusters}{A numeric vector that specifies the range for the number of clusters to consider in the search for a clustering estimate.}
 
-\item{mass}{A numeric vector of mass values to consider in the search for a clustering estimate. Should be missing if the \code{nClusters} argument is used. See \code{Details}.}
+\item{mass}{The mass value to use for sampling. If \code{NULL}, the mass value is found by inverting values from \code{nClusters}.}
 
 \item{nSamples}{The number of samples used to generate the clustering estimate.}
 
-\item{gridLength}{The length of the grid search for an optimal mass parameter. Only applicable if a range of values are provided for \code{nClusters}.}
-
-\item{samplesOnly}{If TRUE, the function only returns the samples generated for a given mass and temperature, rather than an actual clustering estimate.}
+\item{gridLength}{The number of candidate estimates to consider.}
 
 \item{loss}{The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".}
-
-\item{distr}{The random partition distribution used to generate samples.  This must be specified as either "EPA" or "ddCRP".}
 
 \item{temperature}{A positive number that accentuates or dampens distance between observations.}
 
 \item{similarity}{Either \code{"exponential"} or \code{"reciprocal"} to indicate the desired similarity function.}
-
-\item{sd}{Number of standard deviations away from the expectation to be considered in finding boundary mass values.}
 
 \item{maxNClusters}{The maximum number of clusters that can be considered by the SALSO method.}
 
@@ -57,29 +48,20 @@ A object of class \code{salso.estimate}, which provides a clustering estimate (a
 Returns a clustering estimate given pairwise distances using the CaviarPD method.
 }
 \details{
-The \code{mass} argument is the main tuning parameter governing the number of clusters,
-with higher values tending toward more clusters. The \code{mass} is a real number bounded
-below by 0. When a vector of mass values is supplied, a clustering
-estimate for each mass value is generated and the best clustering estimate is returned.
-
-Alternatively, a range for the number of clusters to be considered can be supplied with the
-\code{nClusters} argument. Mass values that return a clustering estimate with the minimum and
-maximum value of the range will estimated. A grid of mass values (of length \code{gridLength}) between
-the estimated min and max cluster mass values will be considered in the search for a clustering
-estimate. If \code{nClusters} is a single integer, then a clustering estimate with \code{nClusters}
-clusters will be returned.
+A range for the number of clusters to be considered is supplied using the
+\code{nClusters} argument. #'  If \code{nClusters} is a single integer, then
+a clustering estimate with \code{nClusters} clusters will be returned.
 }
 \examples{
 # To reduce load on CRAN servers, limit the number of samples, grid length, and CPU cores.
 set.seed(34)
 iris.dis <- dist(iris[,-5])
-est <- caviarpd(distance=iris.dis, mass=c(1, 2), nSamples=50, nCores=1)
-samples <- caviarpd(distance=iris.dis, mass=1, nSamples=50, samplesOnly=TRUE, nCores=1)
-est <- caviarpd(distance=iris.dis, nClusters=3, nSamples=50, nCores=1)
-est <- caviarpd(distance=iris.dis, nClusters=3:5, nSamples=50, gridLength=5, nCores=1)
-summ <- summary(est, orderingMethod=2)
-plot(summ, type="heatmap")
-plot(summ, type="mds")
+est <- caviarpd(distance=iris.dis, nClusters=c(2,4), nSamples=50, nCores=1)
+if ( require("salso") ) {
+  summ <- summary(est, orderingMethod=2)
+  plot(summ, type="heatmap")
+  plot(summ, type="mds")
+}
 
 }
 \references{

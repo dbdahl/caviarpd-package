@@ -144,7 +144,7 @@ fn expected_number_of_clusters(mass: f64, n_items: usize) -> f64 {
     (0..n_items).fold(0.0, |sum, i| sum + mass / (mass + (i as f64)))
 }
 
-fn mass(enoc: f64, n_items: usize) -> f64 {
+fn find_mass(enoc: f64, n_items: usize) -> f64 {
     let f = |mass| expected_number_of_clusters(mass, n_items) - enoc;
     match find_root(f64::EPSILON, enoc, &f, &mut 1e-5_f64) {
         Ok(root) => root,
@@ -166,7 +166,7 @@ fn caviarpd_expected_number_of_clusters(mass: Rval, n_items: Rval) -> Rval {
 #[roxido]
 fn caviarpd_mass(expected_number_of_clusters: Rval, n_items: Rval) -> Rval {
     Rval::new(
-        mass(expected_number_of_clusters.as_f64(), n_items.as_usize()),
+        find_mass(expected_number_of_clusters.as_f64(), n_items.as_usize()),
         &mut pc,
     )
 }
@@ -178,6 +178,7 @@ fn caviarpd_algorithm2(
     similarity: Rval,
     min_n_clusters: Rval,
     max_n_clusters: Rval,
+    mass: Rval,
     n_samples: Rval,
     grid_length: Rval,
     n0: Rval,
@@ -225,16 +226,26 @@ fn caviarpd_algorithm2(
         prob_sequential_allocation: 0.5,
         prob_singletons_initialization: 0.0,
     };
-    let step_size = (max_n_clusters - min_n_clusters) / (grid_length as f64);
     let mut previous = 1.0;
     let mut candidates_labels = Vec::with_capacity(grid_length * n_items);
     let mut candidates_n_clusters = Vec::with_capacity(grid_length);
-    let mut enocs: Vec<_> = (0..grid_length)
-        .map(|x| min_n_clusters + (x as f64) * step_size)
-        .collect();
-    enocs.shuffle(&mut rng);
-    for (i, enoc) in enocs.into_iter().enumerate() {
-        let mass = mass(enoc, n_items);
+    let masses = {
+        let mut masses = if mass.is_nil() {
+            let step_size = (max_n_clusters - min_n_clusters) / (grid_length as f64);
+            (0..grid_length)
+                .map(|x| find_mass(min_n_clusters + (x as f64) * step_size, n_items))
+                .collect::<Vec<_>>()
+        } else {
+            if mass.len() == 1 {
+                vec![mass.as_f64(); grid_length]
+            } else {
+                mass.coerce_double(&mut pc).unwrap().1.to_vec()
+            }
+        };
+        masses.shuffle(&mut rng);
+        masses
+    };
+    for (i, mass) in masses.into_iter().enumerate() {
         let (samples, n_clusters) =
             sample_epa_engine(n_samples, n_items, similarity, mass, n_cores, &mut rng);
         let clusterings =

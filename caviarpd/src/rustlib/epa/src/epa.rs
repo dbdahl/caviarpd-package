@@ -2,7 +2,7 @@
 
 use crate::clust::Clustering;
 use crate::perm::Permutation;
-use roots::find_root_regula_falsi as find_root;
+// use roots::find_root_regula_falsi as find_root;
 
 use rand::prelude::*;
 use std::slice;
@@ -34,6 +34,8 @@ impl<'a> EpaParameters<'a> {
     }
 
     pub fn shuffle_permutation<T: Rng>(&mut self, rng: &mut T) {
+        self.permutation.shuffle(rng);
+        /*
         match std::env::var("DBD_METHOD").as_deref() {
             Ok("jumps" | "biased") => {
                 self.permutation = {
@@ -57,6 +59,7 @@ impl<'a> EpaParameters<'a> {
             }
             _ => self.permutation.shuffle(rng),
         }
+        */
     }
 }
 
@@ -175,6 +178,8 @@ impl<'a> SquareMatrixBorrower<'a> {
 
 pub fn sample<T: Rng>(parameters: &EpaParameters, rng: &mut T) -> Clustering {
     let ni = parameters.similarity.n_items();
+    let (mass, path): (f64, Option<Vec<f64>>) = (parameters.mass, None);
+    /*
     let (mass, path) = match std::env::var("DBD_METHOD").as_deref() {
         Ok("jumps") => {
             let mut path: Vec<_> = std::iter::once(1.0)
@@ -209,6 +214,7 @@ pub fn sample<T: Rng>(parameters: &EpaParameters, rng: &mut T) -> Clustering {
         }
         _ => (parameters.mass, None),
     };
+    */
     let mut clustering = Clustering::unallocated(ni);
     for i in 0..ni {
         let ii = parameters.permutation.get(i);
