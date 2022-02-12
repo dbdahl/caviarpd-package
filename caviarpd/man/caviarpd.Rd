@@ -9,7 +9,7 @@ caviarpd(
   nClusters,
   mass = NULL,
   nSamples = 100,
-  gridLength = 30,
+  gridLength = 10,
   loss = "binder",
   temperature = 10,
   similarity = c("exponential", "reciprocal")[1],

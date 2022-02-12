@@ -39,7 +39,7 @@
 #'
 #' @export
 #'
-caviarpd <- function(distance, nClusters, mass=NULL, nSamples=100, gridLength=30,
+caviarpd <- function(distance, nClusters, mass=NULL, nSamples=100, gridLength=10,
                      loss="binder", temperature=10.0, similarity=c("exponential","reciprocal")[1], maxNClusters=0, nRuns=4, nCores=nRuns) {
   if ( is.matrix(distance) ) {
     if ( !isSymmetric(distance) || !is.numeric(distance) ) stop("'distance' is not a symmetric numerical matrix.")
