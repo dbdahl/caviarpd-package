@@ -37,10 +37,11 @@
 #'   plot(summ, type="mds")
 #' }
 #'
+#' @importFrom stats median
 #' @export
 #'
-caviarpd <- function(distance, nClusters, mass=NULL, nSamples=100, gridLength=10,
-                     loss="binder", temperature=10.0, similarity=c("exponential","reciprocal")[1], maxNClusters=0, nRuns=4, nCores=nRuns) {
+caviarpd <- function(distance, nClusters, mass=NULL, nSamples=200, gridLength=5,
+                     loss="binder", temperature=100, similarity=c("exponential","reciprocal")[1], maxNClusters=0, nRuns=4, nCores=nRuns) {
   if ( is.matrix(distance) ) {
     if ( !isSymmetric(distance) || !is.numeric(distance) ) stop("'distance' is not a symmetric numerical matrix.")
   } else if ( class(distance) == 'dist' ) {
@@ -57,9 +58,11 @@ caviarpd <- function(distance, nClusters, mass=NULL, nSamples=100, gridLength=10
   if ( maxNClusters == 0 ) maxNClusters <- max(nClusters) + 1
   if ( !is.numeric(nRuns) || length(nRuns) != 1 || nRuns < 1 || nRuns %% 1 != 0 ) stop("'nRuns' must be a strictly positive integer")
   if ( !is.numeric(nCores) || length(nCores) != 1 || nCores < 0 || nCores %% 1 != 0 ) stop("'nCores' must be 0 or a positive integer")
+  distance <- distance / median(as.vector(distance))
   similarity <- if ( similarity == "exponential" ) {
     exp( -temperature * distance )
   } else if ( similarity == "reciprocal" ) {
+    if ( any(distance == 0.0 ) ) distance <- distance + 0.01
     1/distance^temperature
   } else stop("Unsupported similarity")
   if ( ! all(is.finite(similarity)) ) stop("'distance', 'temperature', and/or 'similarity' yield similarity with nonfinite values")
