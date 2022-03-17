@@ -49,8 +49,7 @@ Returns a clustering estimate given pairwise distances using the CaviarPD method
 }
 \details{
 A range for the number of clusters to be considered is supplied using the
-\code{nClusters} argument. #'  If \code{nClusters} is a single integer, then
-a clustering estimate with \code{nClusters} clusters will be returned.
+\code{nClusters} argument.
 }
 \examples{
 # To reduce load on CRAN servers, limit the number of samples, grid length, and CPU cores.
