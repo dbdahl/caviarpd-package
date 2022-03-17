@@ -235,12 +235,10 @@ fn caviarpd_algorithm2(
             (0..grid_length)
                 .map(|x| find_mass(min_n_clusters + (x as f64) * step_size, n_items))
                 .collect::<Vec<_>>()
+        } else if mass.len() == 1 {
+            vec![mass.as_f64(); grid_length]
         } else {
-            if mass.len() == 1 {
-                vec![mass.as_f64(); grid_length]
-            } else {
-                mass.coerce_double(&mut pc).unwrap().1.to_vec()
-            }
+            mass.coerce_double(&mut pc).unwrap().1.to_vec()
         };
         masses.shuffle(&mut rng);
         masses
