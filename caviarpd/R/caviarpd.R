@@ -5,8 +5,8 @@
 #' @param distance An object of class 'dist' or a pairwise distance matrix.
 #' @param nClusters A numeric vector that specifies the range for the number of clusters to consider in the search for a clustering estimate.
 #' @param mass The mass value to use for sampling. If \code{NULL}, the mass value is found by inverting values from \code{nClusters}.
-#' @param nSamples The number of samples used to generate the clustering estimate.
-#' @param gridLength The number of candidate estimates to consider.
+#' @param nSamples The number of samples drawn per candidate estimate.
+#' @param gridLength The number of candidate estimates to consider. The final estimate is obtained from \code{nSamples}*\code{gridLength} total samples.
 #' @param loss The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".
 #' @param temperature A positive number that accentuates or dampens distance between observations.
 #' @param similarity Either \code{"exponential"} or \code{"reciprocal"} to indicate the desired similarity function.
@@ -40,7 +40,8 @@
 #' @export
 #'
 caviarpd <- function(distance, nClusters, mass=NULL, nSamples=200, gridLength=5,
-                     loss="binder", temperature=100, similarity=c("exponential","reciprocal")[1], maxNClusters=0, nRuns=4, nCores=nRuns) {
+                     loss="binder", temperature=100, similarity=c("exponential","reciprocal")[1],
+                     maxNClusters=0, nRuns=4, nCores=nRuns) {
   if ( is.matrix(distance) ) {
     if ( !isSymmetric(distance) || !is.numeric(distance) ) stop("'distance' is not a symmetric numerical matrix.")
   } else if ( class(distance) == 'dist' ) {
