@@ -6,7 +6,7 @@
 #' @param nClusters A numeric vector that specifies the range for the number of clusters to consider in the search for a clustering estimate.
 #' @param mass The mass value to use for sampling. If \code{NULL}, the mass value is found by inverting values from \code{nClusters}.
 #' @param nSamples The number of samples drawn per candidate estimate.
-#' @param gridLength The number of candidate estimates to consider. The final estimate is obtained from \code{nSamples} \eqn{\times} \code{gridLength} total samples.
+#' @param gridLength The number of candidate estimates to consider. The final estimate is obtained from \code{nSamples}*\code{gridLength} total samples.
 #' @param loss The SALSO method (Dahl, Johnson, Müller, 2021) tries to minimize this expected loss when searching the partition space for an optimal estimate. This must be either "binder" or "VI".
 #' @param temperature A positive number that accentuates or dampens distance between observations.
 #' @param similarity Either \code{"exponential"} or \code{"reciprocal"} to indicate the desired similarity function.
