@@ -44,7 +44,7 @@ caviarpd <- function(distance, nClusters, mass=NULL, nSamples=200, gridLength=5,
                      maxNClusters=0, nRuns=4, nCores=nRuns) {
   if ( is.matrix(distance) ) {
     if ( !isSymmetric(distance) || !is.numeric(distance) ) stop("'distance' is not a symmetric numerical matrix.")
-  } else if ( class(distance) == 'dist' ) {
+  } else if ( inherits(distance,'dist') ) {
     distance <- as.matrix(distance)
   } else stop("'distance' argument must be an object of class 'dist' or a symmetric numerical matrix.")
   if ( !is.numeric(nClusters) || !all(is.finite(nClusters)) || any(nClusters<1) ) stop("'nClusters' must a numeric vector of finite values not less than 1")
