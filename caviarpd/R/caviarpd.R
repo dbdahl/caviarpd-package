@@ -29,7 +29,7 @@
 #' # To reduce load on CRAN servers, limit the number of samples, grid length, and CPU cores.
 #' set.seed(34)
 #' iris.dis <- dist(iris[,-5])
-#' est <- caviarpd(distance=iris.dis, nClusters=c(2,4), nSamples=50, nCores=1)
+#' est <- caviarpd(distance=iris.dis, nClusters=c(2,4), nSamples=20, nCores=1)
 #' if ( require("salso") ) {
 #'   summ <- summary(est, orderingMethod=2)
 #'   plot(summ, type="heatmap")
