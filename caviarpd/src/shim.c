@@ -1,2 +1,2 @@
-void R_init_caviarpd_librust(void *dll);
-void R_init_caviarpd(void *dll) { R_init_caviarpd_librust(dll); }
+void R_init_caviarpd_rust(void *dll);
+void R_init_caviarpd(void *dll) { R_init_caviarpd_rust(dll); }
