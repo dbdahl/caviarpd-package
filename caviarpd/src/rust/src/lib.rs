@@ -79,7 +79,7 @@ fn sample_epa(n_samples: Rval, similarity: Rval, mass: Rval, n_cores: Rval) -> R
         &mut rng,
     );
     let n_samples = samples.len() / n_items;
-    let (result, result_slice) = Rval::new_matrix_integer(n_samples, n_items, &mut pc);
+    let (result, result_slice) = Rval::new_matrix_integer(n_samples, n_items, pc);
     for i in 0..n_items {
         for j in 0..n_samples {
             result_slice[i * n_samples + j] = i32::from(samples[j * n_items + i] + 1);
@@ -137,7 +137,7 @@ fn caviarpd_n_clusters(
         &mut rng,
     );
     let result = fit.clustering.into_iter().max().unwrap() + 1;
-    Rval::try_new(result, &mut pc).unwrap()
+    Rval::try_new(result, pc).unwrap()
 }
 
 fn expected_number_of_clusters(mass: f64, n_items: usize) -> f64 {
@@ -159,7 +159,7 @@ fn find_mass(enoc: f64, n_items: usize) -> f64 {
 fn caviarpd_expected_number_of_clusters(mass: Rval, n_items: Rval) -> Rval {
     Rval::new(
         expected_number_of_clusters(mass.as_f64(), n_items.as_usize()),
-        &mut pc,
+        pc,
     )
 }
 
@@ -167,7 +167,7 @@ fn caviarpd_expected_number_of_clusters(mass: Rval, n_items: Rval) -> Rval {
 fn caviarpd_mass(expected_number_of_clusters: Rval, n_items: Rval) -> Rval {
     Rval::new(
         find_mass(expected_number_of_clusters.as_f64(), n_items.as_usize()),
-        &mut pc,
+        pc,
     )
 }
 
@@ -215,7 +215,7 @@ fn caviarpd_algorithm2(
     let salso_max_n_clusters = salso_max_n_clusters.as_i32();
     let n_cores = n_cores.as_usize();
     let (samples_rval, samples_slice) =
-        Rval::new_matrix_integer(n_samples * grid_length, n_items, &mut pc);
+        Rval::new_matrix_integer(n_samples * grid_length, n_items, pc);
     let p = SALSOParameters {
         n_items,
         max_size: LabelType::try_from(salso_max_n_clusters).unwrap(),
@@ -238,7 +238,7 @@ fn caviarpd_algorithm2(
         } else if mass.len() == 1 {
             vec![mass.as_f64(); grid_length]
         } else {
-            mass.coerce_double(&mut pc).unwrap().1.to_vec()
+            mass.coerce_double(pc).unwrap().1.to_vec()
         };
         masses.shuffle(&mut rng);
         masses
@@ -313,14 +313,14 @@ fn caviarpd_algorithm2(
         u32::try_from(n_cores).unwrap(),
         &mut rng,
     );
-    let (estimate_rval, estimate_slice) = Rval::new_vector_integer(n_items, &mut pc);
+    let (estimate_rval, estimate_slice) = Rval::new_vector_integer(n_items, pc);
     for (src, dst) in fit.clustering.iter().zip(estimate_slice) {
         *dst = i32::try_from(*src + 1).unwrap();
     }
-    let result = Rval::new_list(2, &mut pc);
+    let result = Rval::new_list(2, pc);
     result.set_list_element(0, estimate_rval);
     result.set_list_element(1, samples_rval);
-    let names = Rval::new(["estimate", "samples"], &mut pc);
+    let names = Rval::new(["estimate", "samples"], pc);
     result.names_gets(names);
     result
 }
