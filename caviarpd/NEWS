@@ -1,5 +1,8 @@
+0.2.31 (2022-06-28)
+  * Updated to latest Cargo Framework from the cargo package.
+
 0.2.29 (2022-04-20)
-  * Updated to latest Cargo Framework.
+  * Updated to latest Cargo Framework from the cargo package.
 
 0.2.28 (2022-03-21)
   * Updated details on the implementation to reflect latest manuscript.
