@@ -1,0 +1,46 @@
+The R package authors are:
+
+    David B. Dahl <dahl@stat.byu.edu> [aut, cre] (<https://orcid.org/0000-0002-8173-1547>)
+    Jacob Andros <androsrj@gmail.com> [aut] (<https://orcid.org/0000-0002-1289-385X>)
+    J. Brandon Carter <carterj4@icloud.com> [aut] (<https://orcid.org/0000-0003-1687-0564>)
+
+The Rust crates upon which this package depends are included in the package
+source in the 'src/rust' directory, most of which are in the archive
+'vendor.tar.xz'.  The names and authors are as follows:
+
+approx         : Brendan Zabarauskas <bjzaba@yahoo.com.au>
+autocfg        : Josh Stone <cuviper@gmail.com>
+cfg-if         : Alex Crichton <alex@alexcrichton.com>
+crossbeam      : The Crossbeam Project Developers
+crossbeam-deque: The Crossbeam Project Developers
+dahl-partition : David B. Dahl <dahl@stat.byu.edu>
+dahl-salso     : David B. Dahl <dahl@stat.byu.edu>
+epa            : David B. Dahl <dahl@stat.byu.edu>
+getrandom      : The Rand Project Developers
+hermit-abi     : Stefan Lankes
+libc           : The Rust Project Developers
+libm           : Jorge Aparicio <jorge@japaric.io>
+matrixmultiply : R. Janis Goldschmidt, bluss
+memoffset      : Gilad Naaman <gilad.naaman@gmail.com>
+ndarray        : Jim Turner, Ulrik Sverdrup "bluss"
+num-complex    : The Rust Project Developers
+num-integer    : The Rust Project Developers
+num-traits     : The Rust Project Developers
+num_cpus       : Sean McArthur <sean@seanmonstar.com>
+once_cell      : Aleksey Kladov <aleksey.kladov@gmail.com>
+ppv-lite86     : The CryptoCorrosion Contributors
+proc-macro2    : David Tolnay <dtolnay@gmail.com>, Alex Crichton <alex@alexcrichton.com>
+quote          : David Tolnay <dtolnay@gmail.com>
+rand           : The Rand Project Developers, The Rust Project Developers
+rand_chacha    : The Rust Project Developers, The Rand Project Developers, The CryptoCorrosion Contributors
+rand_core      : The Rust Project Developers, The Rand Project Developers
+rand_distr     : The Rand Project Developers
+rand_pcg       : The Rand Project Developers
+rawpointer     : bluss
+roots          : Mikhail Vorotilov <mikhail.vorotilov@gmail.com>
+roxido         : David B. Dahl <dahl@stat.byu.edu>
+roxido_macro   : David B. Dahl <dahl@stat.byu.edu>
+scopeguard     : bluss
+syn            : David Tolnay <dtolnay@gmail.com>
+unicode-ident  : David Tolnay <dtolnay@gmail.com>
+wasi           : The Cranelift Project Developers

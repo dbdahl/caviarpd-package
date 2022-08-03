@@ -149,7 +149,7 @@ fn find_mass(enoc: f64, n_items: usize) -> f64 {
     match find_root(f64::EPSILON, enoc, &f, &mut 1e-5_f64) {
         Ok(root) => root,
         Err(e) => {
-            println!("Root finding error.... {e}");
+            println!("Root finding error.... {}",e);
             1.0
         }
     }
