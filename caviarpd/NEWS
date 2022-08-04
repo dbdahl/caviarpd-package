@@ -1,4 +1,4 @@
-0.2.33 (2022-08-05)
+0.2.34 (2022-08-05)
   * Noted authorship of depending Rust crates in DESCRIPTION, inst/AUTHORS, and
     LICENSE.note
   * Modified configure script based on CRAN feedback.
