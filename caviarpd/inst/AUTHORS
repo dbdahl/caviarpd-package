@@ -26,9 +26,9 @@ num-integer   : The Rust Project Developers
 num-traits    : The Rust Project Developers
 num_cpus      : Sean McArthur <sean@seanmonstar.com>
 ppv-lite86    : The CryptoCorrosion Contributors
-proc-macro2   : Alex Crichton <alex@alexcrichton.com>, David Tolnay <dtolnay@gmail.com>
+proc-macro2   : David Tolnay <dtolnay@gmail.com>, Alex Crichton <alex@alexcrichton.com>
 quote         : David Tolnay <dtolnay@gmail.com>
-rand          : The Rust Project Developers, The Rand Project Developers
+rand          : The Rand Project Developers, The Rust Project Developers
 rand_chacha   : The Rand Project Developers, The Rust Project Developers, The CryptoCorrosion Contributors
 rand_core     : The Rust Project Developers, The Rand Project Developers
 rand_distr    : The Rand Project Developers
