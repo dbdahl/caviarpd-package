@@ -22,9 +22,14 @@
 #'
 #' @references
 #'
-#' D. B. Dahl, D. J. Johnson, and P. Müller (2021), Search Algorithms and Loss
-#' Functions for Bayesian Clustering, [arXiv:2105.04451](https://arxiv.org/abs/2105.04451).
+#' D. B. Dahl, J. Andros, J. B. Carter (2022+), Cluster Analysis via Random Partition
+#' Distributions, \emph{Statistical Analysis and Data Mining}, accepted.
+#' \doi{10.1002/sam.11602}.
 #'
+#' D. B. Dahl, D. J. Johnson, and P. Müller (2022), Search Algorithms and Loss
+#' Functions for Bayesian Clustering, \emph{Journal of Computational and
+#' Graphical Statistics}, \doi{10.1080/10618600.2022.2069779}.
+#''
 #' @examples
 #' # To reduce load on CRAN servers, limit the number of samples, grid length, and CPU cores.
 #' set.seed(34)
