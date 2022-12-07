@@ -1,4 +1,4 @@
-0.3.3 (2022-12-06)
+0.3.4 (2022-12-06)
   * Noted authorship of depending Rust crates in DESCRIPTION.
   * Modified configure script based on CRAN feedback.
 
