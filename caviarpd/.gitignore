@@ -3,6 +3,7 @@
 /.Rhistory
 /.RData
 /.Ruserdata
+/authors-scratch.txt
 /src/*.a
 /src/*.o
 /src/*.so
