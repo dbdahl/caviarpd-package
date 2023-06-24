@@ -1,4 +1,6 @@
-mod registration;
+mod registration {
+    include!(concat!(env!("OUT_DIR"), "/registration.rs"));
+}
 
 use dahl_salso::clustering::Clusterings;
 use dahl_salso::optimize::{minimize_by_salso, SALSOParameters};
@@ -67,9 +69,9 @@ fn sample_epa_engine<T: Rng>(
 
 #[roxido]
 fn sample_epa(n_samples: Rval, similarity: Rval, mass: Rval, n_cores: Rval) -> Rval {
-    let mut rng = Pcg64Mcg::from_seed(r::random_bytes::<16>());
+    let mut rng = Pcg64Mcg::from_seed(R::random_bytes::<16>());
     let n_samples = n_samples.as_usize();
-    let n_items = similarity.nrow();
+    let n_items = similarity.nrow().unwrap();
     let (samples, _) = sample_epa_engine(
         n_samples,
         n_items,
@@ -98,9 +100,9 @@ fn caviarpd_n_clusters(
     max_size: Rval,
     n_cores: Rval,
 ) -> Rval {
-    let mut rng = Pcg64Mcg::from_seed(r::random_bytes::<16>());
+    let mut rng = Pcg64Mcg::from_seed(R::random_bytes::<16>());
     let n_samples = n_samples.as_usize();
-    let n_items = similarity.nrow();
+    let n_items = similarity.nrow().unwrap();
     let (samples, n_clusters) = sample_epa_engine(
         n_samples,
         n_items,
@@ -149,7 +151,7 @@ fn find_mass(enoc: f64, n_items: usize) -> f64 {
     match find_root(f64::EPSILON, enoc, &f, &mut 1e-5_f64) {
         Ok(root) => root,
         Err(e) => {
-            println!("Root finding error.... {}",e);
+            println!("Root finding error.... {}", e);
             1.0
         }
     }
@@ -188,8 +190,8 @@ fn caviarpd_algorithm2(
     salso_n_runs: Rval,
     n_cores: Rval,
 ) -> Rval {
-    let mut rng = Pcg64Mcg::from_seed(r::random_bytes::<16>());
-    let n_items = similarity.nrow();
+    let mut rng = Pcg64Mcg::from_seed(R::random_bytes::<16>());
+    let n_items = similarity.nrow().unwrap();
     let similarity: &[f64] = similarity.try_into().unwrap();
     let (min_n_clusters, max_n_clusters) = {
         let x1 = min_n_clusters.as_f64();
@@ -318,9 +320,9 @@ fn caviarpd_algorithm2(
         *dst = i32::try_from(*src + 1).unwrap();
     }
     let result = Rval::new_list(2, pc);
-    result.set_list_element(0, estimate_rval);
-    result.set_list_element(1, samples_rval);
+    let _ = result.set_list_element(0, estimate_rval);
+    let _ = result.set_list_element(1, samples_rval);
     let names = Rval::new(["estimate", "samples"], pc);
-    result.names_gets(names);
+    let _ = result.names_gets(names);
     result
 }

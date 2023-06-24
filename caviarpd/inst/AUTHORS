@@ -1,3 +1,0 @@
-The depending Rust crates have authors as noted in the DESCRIPTION file derived
-from the Cargo.toml files of the vendored sources in the src/rust directory
-(including vendor.tar.xz).
