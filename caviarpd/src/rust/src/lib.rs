@@ -148,7 +148,7 @@ fn expected_number_of_clusters(mass: f64, n_items: usize) -> f64 {
 
 fn find_mass(enoc: f64, n_items: usize) -> f64 {
     let f = |mass| expected_number_of_clusters(mass, n_items) - enoc;
-    match find_root(f64::EPSILON, enoc, &f, &mut 1e-5_f64) {
+    match find_root(f64::EPSILON, enoc, f, &mut 1e-5_f64) {
         Ok(root) => root,
         Err(e) => {
             println!("Root finding error.... {}", e);
