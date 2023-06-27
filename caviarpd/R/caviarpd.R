@@ -22,13 +22,12 @@
 #'
 #' @references
 #'
-#' D. B. Dahl, J. Andros, J. B. Carter (2022+), Cluster Analysis via Random Partition
-#' Distributions, \emph{Statistical Analysis and Data Mining}, accepted.
-#' \doi{10.1002/sam.11602}.
+#' D. B. Dahl, J. Andros, J. B. Carter (2023), Cluster Analysis via Random Partition
+#' Distributions, \emph{Statistical Analysis and Data Mining}, \doi{10.1002/sam.11602}.
 #'
 #' D. B. Dahl, D. J. Johnson, and P. Müller (2022), Search Algorithms and Loss
 #' Functions for Bayesian Clustering, \emph{Journal of Computational and
-#' Graphical Statistics}, \doi{10.1080/10618600.2022.2069779}.
+#' Graphical Statistics}, 31(4), 1189-1201, \doi{10.1080/10618600.2022.2069779}.
 #''
 #' @examples
 #' # To reduce load on CRAN servers, limit the number of samples, grid length, and CPU cores.
