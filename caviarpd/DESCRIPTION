@@ -1,7 +1,7 @@
 Package: caviarpd
 Type: Package
 Title: Cluster Analysis via Random Partition Distributions
-Version: 0.3.8
+Version: 0.3.9
 Authors@R: c(person(given = "David B.", family = "Dahl", role = c("aut", "cre"), email = "dahl@stat.byu.edu", comment = c(ORCID = "0000-0002-8173-1547")),
     person(given = "R. Jacob", family = "Andros", role = c("aut"), email = "androsrj@gmail.com", comment = c(ORCID = "0000-0002-1289-385X")),
     person(given = "J. Brandon", family = "Carter",role = c("aut"), email = "carterj4@icloud.com", comment = c(ORCID = "0000-0003-1687-0564")),
