@@ -326,8 +326,8 @@ fn caviarpd_algorithm2(
         *dst = i32::try_from(*src + 1).unwrap();
     }
     let result = R::new_list(2, pc);
-    result.set(0, &estimate_rval).stop();
-    result.set(1, &samples_rval).stop();
-    result.set_names(&["estimate", "samples"].to_r(pc)).stop();
+    result.set(0, estimate_rval).stop();
+    result.set(1, samples_rval).stop();
+    result.set_names(["estimate", "samples"].to_r(pc)).stop();
     result
 }
