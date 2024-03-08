@@ -69,15 +69,15 @@ fn sample_epa_engine<T: Rng>(
 #[roxido]
 fn sample_epa(n_samples: RObject, similarity: RObject, mass: RObject, n_cores: RObject) -> RObject {
     let mut rng = Pcg64Mcg::from_seed(R::random_bytes::<16>());
-    let n_samples = n_samples.as_usize().stop();
-    let similarity = similarity.as_matrix().stop().as_mode_double().stop();
+    let n_samples = n_samples.usize().stop();
+    let similarity = similarity.matrix().stop().double().stop();
     let n_items = similarity.nrow();
     let (samples, _) = sample_epa_engine(
         n_samples,
         n_items,
         similarity.slice(),
-        mass.as_f64().stop(),
-        n_cores.as_usize().stop(),
+        mass.f64().stop(),
+        n_cores.usize().stop(),
         &mut rng,
     );
     let n_samples = samples.len() / n_items;
@@ -102,33 +102,33 @@ fn caviarpd_n_clusters(
     n_cores: RObject,
 ) -> RObject {
     let mut rng = Pcg64Mcg::from_seed(R::random_bytes::<16>());
-    let n_samples = n_samples.as_usize().stop();
-    let similarity = similarity.as_matrix().stop().as_mode_double().stop();
+    let n_samples = n_samples.usize().stop();
+    let similarity = similarity.matrix().stop().double().stop();
     let n_items = similarity.nrow();
     let (samples, n_clusters) = sample_epa_engine(
         n_samples,
         n_items,
         similarity.slice(),
-        mass.as_f64().stop(),
-        n_cores.as_usize().stop(),
+        mass.f64().stop(),
+        n_cores.usize().stop(),
         &mut rng,
     );
     let n_samples = samples.len() / n_items;
     let clusterings = Clusterings::unvalidated(n_samples, n_items, samples, n_clusters);
     let pdi = PartitionDistributionInformation::Draws(&clusterings);
     let a = 1.0;
-    let loss_function = if use_vi.as_bool().stop() {
+    let loss_function = if use_vi.bool().stop() {
         LossFunction::VI(a)
     } else {
         LossFunction::BinderDraws(a)
     };
     let p = SALSOParameters {
         n_items,
-        max_size: LabelType::try_from(max_size.as_i32().stop()).unwrap(),
+        max_size: LabelType::try_from(max_size.i32().stop()).unwrap(),
         max_size_as_rf: false,
         max_scans: u32::MAX,
         max_zealous_updates: 10,
-        n_runs: u32::try_from(n_runs.as_i32().stop()).unwrap(),
+        n_runs: u32::try_from(n_runs.i32().stop()).unwrap(),
         prob_sequential_allocation: 0.5,
         prob_singletons_initialization: 0.0,
     };
@@ -137,7 +137,7 @@ fn caviarpd_n_clusters(
         loss_function,
         &p,
         f64::INFINITY,
-        u32::try_from(n_cores.as_i32().stop()).unwrap(),
+        u32::try_from(n_cores.i32().stop()).unwrap(),
         &mut rng,
     );
     let result = fit.clustering.into_iter().max().unwrap() + 1;
@@ -161,14 +161,14 @@ fn find_mass(enoc: f64, n_items: usize) -> f64 {
 
 #[roxido]
 fn caviarpd_expected_number_of_clusters(mass: RObject, n_items: RObject) -> RObject {
-    expected_number_of_clusters(mass.as_f64().stop(), n_items.as_usize().stop())
+    expected_number_of_clusters(mass.f64().stop(), n_items.usize().stop())
 }
 
 #[roxido]
 fn caviarpd_mass(expected_number_of_clusters: RObject, n_items: RObject) -> RObject {
     find_mass(
-        expected_number_of_clusters.as_f64().stop(),
-        n_items.as_usize().stop(),
+        expected_number_of_clusters.f64().stop(),
+        n_items.usize().stop(),
     )
 }
 
@@ -190,22 +190,22 @@ fn caviarpd_algorithm2(
     n_cores: RObject,
 ) -> RObject {
     let mut rng = Pcg64Mcg::from_seed(R::random_bytes::<16>());
-    let similarity = similarity.as_matrix().stop();
+    let similarity = similarity.matrix().stop();
     let n_items = similarity.nrow();
-    let similarity_rval = similarity.as_mode_double().stop();
+    let similarity_rval = similarity.double().stop();
     let similarity = similarity_rval.slice();
     let (min_n_clusters, max_n_clusters) = {
-        let x1 = min_n_clusters.as_f64().stop();
-        let x2 = max_n_clusters.as_f64().stop();
+        let x1 = min_n_clusters.f64().stop();
+        let x2 = max_n_clusters.f64().stop();
         if x1 < x2 {
             (x1, x2)
         } else {
             (x2, x1)
         }
     };
-    let n_samples = n_samples.as_usize().stop();
+    let n_samples = n_samples.usize().stop();
     let grid_length = grid_length
-        .as_usize()
+        .usize()
         .map(|x| {
             x.max(if min_n_clusters == max_n_clusters {
                 1
@@ -214,12 +214,12 @@ fn caviarpd_algorithm2(
             })
         })
         .stop();
-    let n0 = n0.as_f64().stop().abs();
-    let tol = tol.as_f64().stop().abs();
-    let use_vi = use_vi.as_bool().stop();
-    let salso_n_runs = salso_n_runs.as_i32().map(|x| x.max(1)).stop();
-    let salso_max_n_clusters = salso_max_n_clusters.as_i32().stop();
-    let n_cores = n_cores.as_usize().stop();
+    let n0 = n0.f64().stop().abs();
+    let tol = tol.f64().stop().abs();
+    let use_vi = use_vi.bool().stop();
+    let salso_n_runs = salso_n_runs.i32().map(|x| x.max(1)).stop();
+    let salso_max_n_clusters = salso_max_n_clusters.i32().stop();
+    let n_cores = n_cores.usize().stop();
     let mut samples_rval = R::new_matrix_integer(n_samples * grid_length, n_items, pc);
     let samples_slice = samples_rval.slice_mut();
     let p = SALSOParameters {
@@ -242,7 +242,7 @@ fn caviarpd_algorithm2(
                 .map(|x| find_mass(min_n_clusters + (x as f64) * step_size, n_items))
                 .collect::<Vec<_>>()
         } else {
-            let mass_rval = mass.as_vector().stop().to_mode_double(pc);
+            let mass_rval = mass.vector().stop().to_double(pc);
             let mass = mass_rval.slice();
             if mass.len() == 1 {
                 vec![mass[0]; grid_length]
@@ -328,8 +328,8 @@ fn caviarpd_algorithm2(
         *dst = i32::try_from(*src + 1).unwrap();
     }
     let mut result = R::new_list(2, pc);
-    result.set(0, estimate_rval).stop();
-    result.set(1, samples_rval).stop();
-    result.set_names(["estimate", "samples"].to_r(pc)).stop();
+    result.set(0, &estimate_rval).stop();
+    result.set(1, &samples_rval).stop();
+    result.set_names(&["estimate", "samples"].to_r(pc)).stop();
     result
 }
