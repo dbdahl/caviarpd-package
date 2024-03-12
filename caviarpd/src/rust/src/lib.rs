@@ -67,8 +67,13 @@ fn sample_epa_engine<T: Rng>(
 }
 
 #[roxido]
-fn sample_epa(n_samples: RObject, similarity: RObject, mass: RObject, n_cores: RObject) -> RObject {
-    let mut rng = Pcg64Mcg::from_seed(R::random_bytes::<16>());
+fn sample_epa(
+    n_samples: &RObject,
+    similarity: &RObject,
+    mass: &RObject,
+    n_cores: &RObject,
+) -> &RObject {
+    let mut rng = Pcg64Mcg::from_seed(Pc::random_bytes::<16>());
     let n_samples = n_samples.usize().stop();
     let similarity = similarity.matrix().stop().double().stop();
     let n_items = similarity.nrow();
@@ -81,7 +86,7 @@ fn sample_epa(n_samples: RObject, similarity: RObject, mass: RObject, n_cores: R
         &mut rng,
     );
     let n_samples = samples.len() / n_items;
-    let mut result = R::new_matrix_integer(n_samples, n_items, pc);
+    let result = pc.new_matrix_integer(n_samples, n_items);
     let result_slice = result.slice_mut();
     for i in 0..n_items {
         for j in 0..n_samples {
@@ -93,15 +98,15 @@ fn sample_epa(n_samples: RObject, similarity: RObject, mass: RObject, n_cores: R
 
 #[roxido]
 fn caviarpd_n_clusters(
-    n_samples: RObject,
-    similarity: RObject,
-    mass: RObject,
-    use_vi: RObject,
-    n_runs: RObject,
-    max_size: RObject,
-    n_cores: RObject,
-) -> RObject {
-    let mut rng = Pcg64Mcg::from_seed(R::random_bytes::<16>());
+    n_samples: &RObject,
+    similarity: &RObject,
+    mass: &RObject,
+    use_vi: &RObject,
+    n_runs: &RObject,
+    max_size: &RObject,
+    n_cores: &RObject,
+) -> &RObject {
+    let mut rng = Pcg64Mcg::from_seed(Pc::random_bytes::<16>());
     let n_samples = n_samples.usize().stop();
     let similarity = similarity.matrix().stop().double().stop();
     let n_items = similarity.nrow();
@@ -160,12 +165,12 @@ fn find_mass(enoc: f64, n_items: usize) -> f64 {
 }
 
 #[roxido]
-fn caviarpd_expected_number_of_clusters(mass: RObject, n_items: RObject) -> RObject {
+fn caviarpd_expected_number_of_clusters(mass: &RObject, n_items: &RObject) -> &RObject {
     expected_number_of_clusters(mass.f64().stop(), n_items.usize().stop())
 }
 
 #[roxido]
-fn caviarpd_mass(expected_number_of_clusters: RObject, n_items: RObject) -> RObject {
+fn caviarpd_mass(expected_number_of_clusters: &RObject, n_items: &RObject) -> &RObject {
     find_mass(
         expected_number_of_clusters.f64().stop(),
         n_items.usize().stop(),
@@ -176,20 +181,20 @@ fn caviarpd_mass(expected_number_of_clusters: RObject, n_items: RObject) -> RObj
 
 #[roxido]
 fn caviarpd_algorithm2(
-    similarity: RObject,
-    min_n_clusters: RObject,
-    max_n_clusters: RObject,
-    mass: RObject,
-    n_samples: RObject,
-    grid_length: RObject,
-    n0: RObject,
-    tol: RObject,
-    use_vi: RObject,
-    salso_max_n_clusters: RObject,
-    salso_n_runs: RObject,
-    n_cores: RObject,
-) -> RObject {
-    let mut rng = Pcg64Mcg::from_seed(R::random_bytes::<16>());
+    similarity: &RObject,
+    min_n_clusters: &RObject,
+    max_n_clusters: &RObject,
+    mass: &RObject,
+    n_samples: &RObject,
+    grid_length: &RObject,
+    n0: &RObject,
+    tol: &RObject,
+    use_vi: &RObject,
+    salso_max_n_clusters: &RObject,
+    salso_n_runs: &RObject,
+    n_cores: &RObject,
+) -> &RObject {
+    let mut rng = Pcg64Mcg::from_seed(Pc::random_bytes::<16>());
     let similarity = similarity.matrix().stop();
     let n_items = similarity.nrow();
     let similarity_rval = similarity.double().stop();
@@ -220,7 +225,7 @@ fn caviarpd_algorithm2(
     let salso_n_runs = salso_n_runs.i32().map(|x| x.max(1)).stop();
     let salso_max_n_clusters = salso_max_n_clusters.i32().stop();
     let n_cores = n_cores.usize().stop();
-    let mut samples_rval = R::new_matrix_integer(n_samples * grid_length, n_items, pc);
+    let samples_rval = pc.new_matrix_integer(n_samples * grid_length, n_items);
     let samples_slice = samples_rval.slice_mut();
     let p = SALSOParameters {
         n_items,
@@ -323,13 +328,13 @@ fn caviarpd_algorithm2(
         u32::try_from(n_cores).unwrap(),
         &mut rng,
     );
-    let mut estimate_rval = R::new_vector_integer(n_items, pc);
+    let estimate_rval = pc.new_vector_integer(n_items);
     for (src, dst) in fit.clustering.iter().zip(estimate_rval.slice_mut()) {
         *dst = i32::try_from(*src + 1).unwrap();
     }
-    let mut result = R::new_list(2, pc);
-    result.set(0, &estimate_rval).stop();
-    result.set(1, &samples_rval).stop();
-    result.set_names(&["estimate", "samples"].to_r(pc)).stop();
+    let result = pc.new_list(2);
+    result.set(0, estimate_rval).stop();
+    result.set(1, samples_rval).stop();
+    result.set_names(["estimate", "samples"].to_r(pc)).stop();
     result
 }
