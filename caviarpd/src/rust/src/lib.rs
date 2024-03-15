@@ -226,7 +226,7 @@ fn caviarpd_algorithm2(
                 .map(|x| find_mass(min_n_clusters + (x as f64) * step_size, n_items))
                 .collect::<Vec<_>>()
         } else {
-            let mass_rval = mass.vector().stop().atomic().stop().to_double(pc);
+            let mass_rval = mass.vector().stop().to_double(pc);
             let mass = mass_rval.slice();
             if mass.len() == 1 {
                 vec![mass[0]; grid_length]
