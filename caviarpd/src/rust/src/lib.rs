@@ -67,9 +67,8 @@ fn sample_epa_engine<T: Rng>(
 }
 
 #[roxido]
-fn sample_epa(n_samples: usize, similarity: &RObject, mass: f64, n_cores: usize) {
+fn sample_epa(n_samples: usize, similarity: &RMatrix<f64>, mass: f64, n_cores: usize) {
     let mut rng = Pcg64Mcg::from_seed(R::random_bytes::<16>());
-    let similarity = similarity.as_matrix().stop().as_f64().stop();
     let n_items = similarity.nrow();
     let (samples, _) = sample_epa_engine(
         n_samples,
@@ -80,7 +79,7 @@ fn sample_epa(n_samples: usize, similarity: &RObject, mass: f64, n_cores: usize)
         &mut rng,
     );
     let n_samples = samples.len() / n_items;
-    let result = RObject::<RMatrix, i32>::new(n_samples, n_items, pc);
+    let result = RMatrix::<i32>::new(n_samples, n_items, pc);
     let result_slice = result.slice_mut();
     for i in 0..n_items {
         for j in 0..n_samples {
@@ -93,7 +92,7 @@ fn sample_epa(n_samples: usize, similarity: &RObject, mass: f64, n_cores: usize)
 #[roxido]
 fn caviarpd_n_clusters(
     n_samples: usize,
-    similarity: &RObject,
+    similarity: &RMatrix<f64>,
     mass: f64,
     use_vi: bool,
     n_runs: i32,
@@ -101,7 +100,6 @@ fn caviarpd_n_clusters(
     n_cores: usize,
 ) {
     let mut rng = Pcg64Mcg::from_seed(R::random_bytes::<16>());
-    let similarity = similarity.as_matrix().stop().as_f64().stop();
     let n_items = similarity.nrow();
     let (samples, n_clusters) = sample_epa_engine(
         n_samples,
@@ -171,7 +169,7 @@ fn caviarpd_mass(expected_number_of_clusters: f64, n_items: usize) {
 
 #[roxido]
 fn caviarpd_algorithm2(
-    similarity: &RObject,
+    similarity: &RMatrix<f64>,
     min_n_clusters: f64,
     max_n_clusters: f64,
     mass: &RObject,
@@ -185,9 +183,8 @@ fn caviarpd_algorithm2(
     n_cores: usize,
 ) {
     let mut rng = Pcg64Mcg::from_seed(R::random_bytes::<16>());
-    let similarity = similarity.as_matrix().stop();
     let n_items = similarity.nrow();
-    let similarity_rval = similarity.as_f64().stop();
+    let similarity_rval = similarity;
     let similarity = similarity_rval.slice();
     let (min_n_clusters, max_n_clusters) = {
         let x1 = min_n_clusters;
@@ -204,7 +201,7 @@ fn caviarpd_algorithm2(
         2
     });
     let salso_n_runs = salso_n_runs.max(1);
-    let samples_rval = RObject::<RMatrix, i32>::new(n_samples * grid_length, n_items, pc);
+    let samples_rval = RMatrix::<i32>::new(n_samples * grid_length, n_items, pc);
     let samples_slice = samples_rval.slice_mut();
     let p = SALSOParameters {
         n_items,
@@ -307,11 +304,11 @@ fn caviarpd_algorithm2(
         u32::try_from(n_cores).unwrap(),
         &mut rng,
     );
-    let estimate_rval = RObject::<RVector, i32>::new(n_items, pc);
+    let estimate_rval = RVector::<i32>::new(n_items, pc);
     for (src, dst) in fit.clustering.iter().zip(estimate_rval.slice_mut()) {
         *dst = i32::try_from(*src + 1).unwrap();
     }
-    let result = RObject::<RList>::with_names(["estimate", "samples"], pc);
+    let result = RList::with_names(&["estimate", "samples"], pc);
     result.set(0, estimate_rval).stop();
     result.set(1, samples_rval).stop();
     result
