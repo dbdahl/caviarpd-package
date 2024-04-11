@@ -1,6 +1,5 @@
-mod registration {
-    include!(concat!(env!("OUT_DIR"), "/registration.rs"));
-}
+roxido_registration!();
+use roxido::*;
 
 use dahl_salso::clustering::Clusterings;
 use dahl_salso::optimize::{minimize_by_salso, SALSOParameters};
@@ -13,7 +12,6 @@ use rand::SeedableRng;
 use rand_distr::{Beta, Distribution};
 use rand_pcg::Pcg64Mcg;
 use roots::find_root_regula_falsi as find_root;
-use roxido::*;
 use std::convert::TryFrom;
 
 fn sample_epa_engine<T: Rng>(
