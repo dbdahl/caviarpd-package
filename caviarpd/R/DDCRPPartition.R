@@ -39,6 +39,7 @@ edgesToLabels <- function(edges) {
   sapply(seq_along(edges), findLabelFor)
 }
 
+#' @export
 samplePartition.DDCRPPartition <- function(distr, nSamples, randomizePermutation=FALSE) {
   m <- distr$similarity
   diag(m) <- distr$mass
