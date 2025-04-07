@@ -24,7 +24,9 @@ fn sample_epa_engine<T: Rng>(
     rng: &mut T,
 ) -> (Vec<LabelType>, Vec<LabelType>) {
     let n_cores = if n_cores == 0 {
-        num_cpus::get()
+        std::thread::available_parallelism()
+            .map(|x| x.get())
+            .unwrap_or(1)
     } else {
         n_cores
     };
@@ -41,11 +43,11 @@ fn sample_epa_engine<T: Rng>(
         for _ in 0..n_cores - 1 {
             let (left1, right1) = stick1.split_at_mut(chunk_size);
             let (left2, right2) = stick2.split_at_mut(n_samples_per_core);
-            plan.push((left1, left2, rng.gen::<u128>()));
+            plan.push((left1, left2, rng.random::<u128>()));
             stick1 = right1;
             stick2 = right2;
         }
-        plan.push((stick1, stick2, rng.gen()));
+        plan.push((stick1, stick2, rng.random()));
         let sim = SquareMatrixBorrower::from_slice(similarity, n_items);
         plan.into_iter().for_each(|p| {
             s.spawn(move |_| {
