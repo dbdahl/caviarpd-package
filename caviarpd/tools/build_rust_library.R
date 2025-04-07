@@ -36,6 +36,8 @@ get_version <- function(what = c("cargo", "rustc")[1]) {
     message(version_string_full)
     NULL
   } else {
+    dir.create("inst", showWarnings = FALSE, recursive = FALSE)
+    writeLines(version_string, con = file.path("inst", "cargo.log"))
     version_string
   }
 }
