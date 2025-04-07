@@ -1,3 +1,6 @@
+0.3.19 (20YY-MM-DD)
+  * Do not specify a build target and rely on the default choice.
+
 0.3.18 (2025-04-07)
   * Bump Rust version.
 
