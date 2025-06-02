@@ -1,3 +1,6 @@
+0.3.20 (2025-06-02)
+  * Latest Roxido framework.
+
 0.3.19 (2025-04-09)
   * Do not specify a build target and rely on the default choice.
 
