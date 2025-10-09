@@ -219,7 +219,7 @@ impl Clustering {
         &self,
         target: Option<&[usize]>,
         item: usize,
-    ) -> ClusterLabelsIterator {
+    ) -> ClusterLabelsIterator<'_> {
         let new_label = match target {
             Some(target) => {
                 let what = target[item];
@@ -238,7 +238,7 @@ impl Clustering {
         }
     }
 
-    pub fn available_labels_for_reallocation(&self, item: usize) -> ClusterLabelsIterator {
+    pub fn available_labels_for_reallocation(&self, item: usize) -> ClusterLabelsIterator<'_> {
         let new_label = if self.size_of(self.allocation[item]) > 1 {
             Some(self.new_label())
         } else {

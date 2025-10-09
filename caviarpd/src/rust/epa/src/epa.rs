@@ -106,7 +106,7 @@ impl SquareMatrix {
         &mut self.data[..]
     }
 
-    pub fn view(&mut self) -> SquareMatrixBorrower {
+    pub fn view(&mut self) -> SquareMatrixBorrower<'_> {
         SquareMatrixBorrower::from_slice(&self.data[..], self.n_items)
     }
 
