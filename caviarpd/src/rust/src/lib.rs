@@ -3,13 +3,14 @@ roxido_registration!();
 use roxido::*;
 
 use dahl_salso::clustering::Clusterings;
-use dahl_salso::optimize::{minimize_by_salso, SALSOParameters};
+use dahl_salso::optimize::{SALSOParameters, minimize_by_salso};
 use dahl_salso::{LabelType, LossFunction, PartitionDistributionInformation};
-use epa::epa::{sample, EpaParameters, SquareMatrixBorrower};
+use epa::epa::{EpaParameters, SquareMatrixBorrower, sample};
 use epa::perm::Permutation;
-use rand::prelude::SliceRandom;
 use rand::Rng;
+use rand::RngExt;
 use rand::SeedableRng;
+use rand::prelude::SliceRandom;
 use rand_distr::{Beta, Distribution};
 use rand_pcg::Pcg64Mcg;
 use roots::find_root_regula_falsi as find_root;
@@ -190,11 +191,7 @@ fn caviarpd_algorithm2(
     let (min_n_clusters, max_n_clusters) = {
         let x1 = min_n_clusters;
         let x2 = max_n_clusters;
-        if x1 < x2 {
-            (x1, x2)
-        } else {
-            (x2, x1)
-        }
+        if x1 < x2 { (x1, x2) } else { (x2, x1) }
     };
     let grid_length = grid_length.max(if min_n_clusters == max_n_clusters {
         1
